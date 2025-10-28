@@ -47,13 +47,13 @@ Next.js App Router structure:
 
 ### Database Setup
 
-- [ ] T008 Setup Supabase project and configure connection in lib/supabase/client.ts
-- [ ] T009 [P] Create database migration: Create notion_pages table with indexes in database/migrations/001_create_notion_pages.sql
-- [ ] T010 [P] Create database migration: Create notion_blocks table with pgvector embedding column and indexes in database/migrations/002_create_notion_blocks.sql
-- [ ] T011 [P] Create database migration: Create chat_sessions, chat_messages, chat_citations tables in database/migrations/003_create_chat_tables.sql
-- [ ] T012 [P] Create database migration: Create collections and collection_conversations tables with GIN indexes in database/migrations/004_create_collections.sql
-- [ ] T013 [P] Create database migration: Create sync_jobs table in database/migrations/005_create_sync_jobs.sql
-- [ ] T014 Create database schema types: Generate TypeScript types from Supabase schema in lib/supabase/types.ts
+- [x] T008 Setup Supabase project and configure connection in lib/supabase/client.ts
+- [x] T009 [P] Create database migration: Create notion_pages table with indexes in database/migrations/001_create_notion_pages.sql
+- [x] T010 [P] Create database migration: Create notion_blocks table with pgvector embedding column and indexes in database/migrations/002_create_notion_blocks.sql
+- [x] T011 [P] Create database migration: Create chat_sessions, chat_messages, chat_citations tables in database/migrations/003_create_chat_tables.sql
+- [x] T012 [P] Create database migration: Create collections and collection_conversations tables with GIN indexes in database/migrations/004_create_collections.sql
+- [x] T013 [P] Create database migration: Create sync_jobs table in database/migrations/005_create_sync_jobs.sql
+- [x] T014 Create database schema types: Generate TypeScript types from Supabase schema in lib/supabase/types.ts
 - [ ] T015 Run database migrations and verify Supabase pgvector extension is enabled
 
 ### Notion Integration - Milestone 1
@@ -76,9 +76,9 @@ Next.js App Router structure:
 ### Authentication & API Infrastructure
 
 - [ ] T027 Setup NextAuth with Google provider in lib/auth/nextauth.ts
-- [ ] T028 Configure auth middleware and session management in middleware.ts
-- [ ] T029 Create base API route handler utilities in lib/api/base-handler.ts
-- [ ] T030 Setup error handling and logging infrastructure in lib/utils/errors.ts and lib/utils/logger.ts
+- [x] T028 Configure auth middleware and session management in middleware.ts
+- [x] T029 Create base API route handler utilities in lib/api/base-handler.ts
+- [x] T030 Setup error handling and logging infrastructure in lib/utils/errors.ts and lib/utils/logger.ts
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
