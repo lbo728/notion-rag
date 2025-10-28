@@ -1,0 +1,579 @@
+openapi: 3.0.3
+info:
+  title: Notion RAG Chatbot API
+  description: API for personal knowledge archive chat interface with Notion integration
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost:3000
+    description: Local development
+  - url: https://your-app.vercel.app
+    description: Production (Vercel)
+  - url: https://your-app.firebaseapp.com
+    description: Production (Firebase)
+
+security:
+  - nextAuth: []
+
+paths:
+  /api/chat:
+    post:
+      summary: Send chat message and get AI response
+      operationId: sendMessage
+      tags:
+        - Chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+                  description: User's question/message
+                  example: "What are embeddings used for?"
+                session_id:
+                  type: string
+                  format: uuid
+                  description: Optional existing session ID for conversation context
+                context_window:
+                  type: integer
+                  description: Number of previous messages to include
+                  default: 10
+                  minimum: 1
+                  maximum: 50
+      responses:
+        "200":
+          description: Successful response with citations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  content:
+                    type: string
+                    description: AI-generated response
+                  citations:
+                    type: array
+                    minItems: 2
+                    items:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+                        url:
+                          type: string
+                          format: uri
+                        snippet:
+                          type: string
+                        relevance_score:
+                          type: number
+                          format: float
+                          minimum: 0
+                          maximum: 1
+                  tokens_used:
+                    type: integer
+                  response_time_ms:
+                    type: integer
+        "400":
+          description: Bad request (missing message)
+        "401":
+          description: Unauthorized (not authenticated)
+        "429":
+          description: Rate limit exceeded
+        "500":
+          description: Internal server error
+
+  /api/chat/sessions:
+    get:
+      summary: List user's chat sessions
+      operationId: listSessions
+      tags:
+        - Chat
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: List of chat sessions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessions:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ChatSession"
+                  total:
+                    type: integer
+
+    post:
+      summary: Create new chat session
+      operationId: createSession
+      tags:
+        - Chat
+      responses:
+        "201":
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatSession"
+
+  /api/chat/sessions/{session_id}:
+    get:
+      summary: Get chat session with messages
+      operationId: getSession
+      tags:
+        - Chat
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Chat session with messages and citations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatSessionDetail"
+
+    delete:
+      summary: Delete chat session
+      operationId: deleteSession
+      tags:
+        - Chat
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Session deleted
+
+  /api/sync/trigger:
+    post:
+      summary: Trigger manual Notion sync
+      operationId: triggerSync
+      tags:
+        - Sync
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sync_type:
+                  type: string
+                  enum: [full, incremental]
+                  default: incremental
+                force:
+                  type: boolean
+                  default: false
+      responses:
+        "202":
+          description: Sync job started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum: [running, queued]
+                  started_at:
+                    type: string
+                    format: date-time
+
+  /api/sync/status:
+    get:
+      summary: Get latest sync status
+      operationId: getSyncStatus
+      tags:
+        - Sync
+      responses:
+        "200":
+          description: Latest sync job status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncJob"
+
+  /api/sync/status/{job_id}:
+    get:
+      summary: Get specific sync job status
+      operationId: getSyncJobStatus
+      tags:
+        - Sync
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Sync job status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncJob"
+
+  /api/collections:
+    get:
+      summary: List user's collections
+      operationId: listCollections
+      tags:
+        - Collections
+      responses:
+        "200":
+          description: List of collections
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  collections:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Collection"
+
+    post:
+      summary: Create collection
+      operationId: createCollection
+      tags:
+        - Collections
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  maxLength: 100
+                description:
+                  type: string
+                  maxLength: 500
+      responses:
+        "201":
+          description: Collection created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Collection"
+
+  /api/collections/{collection_id}:
+    get:
+      summary: Get collection with conversations
+      operationId: getCollection
+      tags:
+        - Collections
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Collection with conversations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CollectionDetail"
+
+    patch:
+      summary: Update collection
+      operationId: updateCollection
+      tags:
+        - Collections
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+      responses:
+        "200":
+          description: Collection updated
+
+    delete:
+      summary: Delete collection
+      operationId: deleteCollection
+      tags:
+        - Collections
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Collection deleted
+
+  /api/collections/{collection_id}/conversations:
+    post:
+      summary: Save conversation to collection
+      operationId: saveConversation
+      tags:
+        - Collections
+      parameters:
+        - name: collection_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - session_id
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                tags:
+                  type: array
+                  items:
+                    type: string
+                notes:
+                  type: string
+                  maxLength: 1000
+      responses:
+        "201":
+          description: Conversation saved to collection
+
+  /api/health:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      tags:
+        - Health
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  database:
+                    type: string
+                    example: connected
+                  supabase:
+                    type: string
+                    example: connected
+                  openai:
+                    type: string
+                    example: connected
+
+components:
+  schemas:
+    ChatSession:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+        session_name:
+          type: string
+          nullable: true
+        started_at:
+          type: string
+          format: date-time
+        message_count:
+          type: integer
+        total_tokens:
+          type: integer
+
+    ChatSessionDetail:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/ChatSession"
+        - type: object
+          properties:
+            messages:
+              type: array
+              items:
+                $ref: "#/components/schemas/ChatMessage"
+
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        citations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Citation"
+          description: Citations only for assistant messages
+
+    Citation:
+      type: object
+      properties:
+        title:
+          type: string
+        url:
+          type: string
+          format: uri
+        snippet:
+          type: string
+        relevance_score:
+          type: number
+          format: float
+
+    Collection:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        conversation_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    CollectionDetail:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/Collection"
+        - type: object
+          properties:
+            conversations:
+              type: array
+              items:
+                type: object
+                properties:
+                  session_id:
+                    type: string
+                    format: uuid
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                  saved_at:
+                    type: string
+                    format: date-time
+
+    SyncJob:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        job_type:
+          type: string
+          enum: [scheduled, manual, retry]
+        status:
+          type: string
+          enum: [running, completed, failed, cancelled]
+        started_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        pages_processed:
+          type: integer
+        blocks_processed:
+          type: integer
+        embeddings_created:
+          type: integer
+        error_message:
+          type: string
+          nullable: true
+
+  securitySchemes:
+    nextAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: NextAuth session token
+
+tags:
+  - name: Chat
+    description: Chat interface operations
+  - name: Sync
+    description: Notion synchronization operations
+  - name: Collections
+    description: Collection management operations
+  - name: Health
+    description: Health check endpoints
