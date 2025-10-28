@@ -29,13 +29,13 @@ Next.js App Router structure:
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Initialize Next.js 15 project with TypeScript and App Router in root directory
-- [ ] T002 [P] Install dependencies: Next.js 15, React 19, TypeScript, shadcn/ui, TanStack Query, NextAuth, Supabase Client, OpenAI SDK, Notion SDK in package.json
-- [ ] T003 [P] Configure Tailwind CSS and shadcn/ui components in tailwind.config.ts and components.json
-- [ ] T004 [P] Setup environment configuration: Create .env.local with Notion, Supabase, OpenAI keys, and NextAuth secrets
-- [ ] T005 [P] Configure linting and formatting tools: ESLint, Prettier, and TypeScript in .eslintrc.json, .prettierrc, tsconfig.json
-- [ ] T006 [P] Setup testing frameworks: Vitest (unit), Playwright (E2E), Jest (component) in vitest.config.ts, playwright.config.ts, jest.config.js
-- [ ] T007 Create project structure: app/, lib/, components/, types/, tests/ directories per plan.md
+- [x] T001 Initialize Next.js 15 project with TypeScript and App Router in root directory
+- [x] T002 [P] Install dependencies: Next.js 15, React 19, TypeScript, shadcn/ui, TanStack Query, NextAuth, Supabase Client, OpenAI SDK, Notion SDK in package.json
+- [x] T003 [P] Configure Tailwind CSS and shadcn/ui components in tailwind.config.ts and components.json
+- [x] T004 [P] Setup environment configuration: Create .env.local with Notion, Supabase, OpenAI keys, and NextAuth secrets
+- [x] T005 [P] Configure linting and formatting tools: ESLint, Prettier, and TypeScript in .eslintrc.json, .prettierrc, tsconfig.json
+- [x] T006 [P] Setup testing frameworks: Vitest (unit), Playwright (E2E), Jest (component) in vitest.config.ts, playwright.config.ts, jest.config.js
+- [x] T007 Create project structure: app/, lib/, components/, types/, tests/ directories per plan.md
 
 ---
 
