@@ -58,20 +58,20 @@ Next.js App Router structure:
 
 ### Notion Integration - Milestone 1
 
-- [ ] T016 [P] Implement Notion API client with OAuth authentication in lib/notion/api-client.ts
-- [ ] T017 [P] Create Notion database listing utility to fetch all databases and pages in lib/notion/list-pages.ts
-- [ ] T018 Implement Notion page fetch with property preservation (tags/status/editor/lastEditedTime) in lib/notion/fetch-page.ts
-- [ ] T019 Create Notion block parser to extract text with metadata (code/quote/list preserved) in lib/notion/parser.ts
-- [ ] T020 Implement Notion block → text extractor maintaining code/quote/list formatting in lib/notion/text-extractor.ts
+- [x] T016 [P] Implement Notion API client with OAuth authentication in lib/notion/api-client.ts
+- [x] T017 [P] Create Notion database listing utility to fetch all databases and pages in lib/notion/list-pages.ts
+- [x] T018 Implement Notion page fetch with property preservation (tags/status/editor/lastEditedTime) in lib/notion/fetch-page.ts
+- [x] T019 Create Notion block parser to extract text with metadata (code/quote/list preserved) in lib/notion/parser.ts
+- [x] T020 Implement Notion block → text extractor maintaining code/quote/list formatting in lib/notion/text-extractor.ts
 
 ### Chunking and Embedding - Milestone 2
 
-- [ ] T021 [P] Implement chunker with header-aware grouping in lib/notion/chunker.ts
-- [ ] T022 Configure chunking parameters: 400-800 tokens variable-length, 20% overlap, paragraph/header boundaries in lib/notion/chunker.ts
-- [ ] T023 [P] Implement OpenAI embedding batch processing with retry/backoff logic in lib/embeddings/openai.ts
-- [ ] T024 Configure embedding batch size: 512-1024 tokens per batch in lib/embeddings/openai.ts
-- [ ] T025 [P] Design VectorStore schema for Supabase pgvector (1536 dimensions) in database/migrations/002_create_notion_blocks.sql
-- [ ] T026 Create vector storage utilities for saving embeddings with metadata in lib/retrieval/vector-store.ts
+- [x] T021 [P] Implement chunker with header-aware grouping in lib/notion/chunker.ts
+- [x] T022 Configure chunking parameters: 400-800 tokens variable-length, 20% overlap, paragraph/header boundaries in lib/notion/chunker.ts
+- [x] T023 [P] Implement OpenAI embedding batch processing with retry/backoff logic in lib/embeddings/openai.ts
+- [x] T024 Configure embedding batch size: 512-1024 tokens per batch in lib/embeddings/openai.ts
+- [x] T025 [P] Design VectorStore schema for Supabase pgvector (1536 dimensions) in database/migrations/002_create_notion_blocks.sql
+- [x] T026 Create vector storage utilities for saving embeddings with metadata in lib/retrieval/vector-store.ts
 
 ### Authentication & API Infrastructure
 
