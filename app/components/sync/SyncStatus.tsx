@@ -33,7 +33,9 @@ export function SyncStatus() {
   }
 
   if (!status) {
-    return <div className="text-xs text-gray-500">No sync status available</div>;
+    return (
+      <div className="text-xs text-gray-500">No sync status available</div>
+    );
   }
 
   const formatDate = (dateString: string | null | undefined) => {
@@ -75,4 +77,3 @@ export function SyncStatus() {
     </div>
   );
 }
-

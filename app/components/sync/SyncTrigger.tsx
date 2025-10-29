@@ -56,10 +56,7 @@ export function SyncTrigger({ onSyncComplete }: SyncTriggerProps) {
           {loading ? "Syncing..." : "Incremental Sync"}
         </button>
       </div>
-      {error && (
-        <p className="text-xs text-red-600">Error: {error}</p>
-      )}
+      {error && <p className="text-xs text-red-600">Error: {error}</p>}
     </div>
   );
 }
-

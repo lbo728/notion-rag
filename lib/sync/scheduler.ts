@@ -59,4 +59,3 @@ async function runIncrementalSync(): Promise<void> {
 export function isScheduledSyncRunning(): boolean {
   return syncInterval !== null;
 }
-

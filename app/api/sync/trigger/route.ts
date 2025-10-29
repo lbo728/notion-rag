@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/utils/logger";
-import { syncNotionPages, incrementalSyncNotionPages } from "@/lib/sync/notion-sync-service";
+import {
+  syncNotionPages,
+  incrementalSyncNotionPages,
+} from "@/lib/sync/notion-sync-service";
 
 /**
  * POST /api/sync/trigger
@@ -18,9 +21,7 @@ export async function POST(request: NextRequest) {
 
     // Start sync in background (non-blocking)
     const syncPromise =
-      mode === "incremental"
-        ? incrementalSyncNotionPages()
-        : syncNotionPages();
+      mode === "incremental" ? incrementalSyncNotionPages() : syncNotionPages();
 
     syncPromise.catch((error) => {
       logger.error("Background sync failed", {
@@ -46,4 +47,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

@@ -91,8 +91,13 @@ export async function vectorSearch(
     const { data, error } = await query;
     
     if (error) {
-      logger.error("Vector search failed", { error: error.message });
-      throw error;
+      logger.error("Vector search failed", { 
+        error: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+      });
+      throw new Error(`Vector search failed: ${error.message} (${error.code || 'unknown'}). ${error.hint || ''} If match_blocks function doesn't exist, run the migration SQL.`);
     }
     
     logger.info("Vector search completed", {

@@ -102,7 +102,7 @@ export async function syncNotionPages(): Promise<SyncResult> {
     logger.error("Error in Notion sync", {
       error: error instanceof Error ? error.message : String(error),
     });
-    
+
     // Update sync job as failed
     if (jobId) {
       await supabase
@@ -114,7 +114,7 @@ export async function syncNotionPages(): Promise<SyncResult> {
         })
         .eq("id", jobId);
     }
-    
+
     throw error;
   }
 }
@@ -135,7 +135,7 @@ export async function incrementalSyncNotionPages(): Promise<SyncResult> {
 
     // Get last sync time
     const lastSyncTime = await getLastSyncTime();
-    
+
     if (!lastSyncTime) {
       logger.info("No previous sync found, performing full sync");
       return await syncNotionPages();
@@ -157,7 +157,7 @@ export async function incrementalSyncNotionPages(): Promise<SyncResult> {
 
     // List all pages from Notion
     const allPages = await listAllPages();
-    
+
     // Filter pages changed since last sync
     const changedPages = allPages.filter((page) => {
       const lastEditedTime = new Date(page.last_edited_time || 0);
@@ -166,7 +166,7 @@ export async function incrementalSyncNotionPages(): Promise<SyncResult> {
 
     result.pagesProcessed = changedPages.length;
 
-    logger.info("Found pages changed since last sync", { 
+    logger.info("Found pages changed since last sync", {
       total: allPages.length,
       changed: changedPages.length,
       lastSyncTime: lastSyncTime.toISOString(),
@@ -206,7 +206,7 @@ export async function incrementalSyncNotionPages(): Promise<SyncResult> {
     logger.error("Error in incremental sync", {
       error: error instanceof Error ? error.message : String(error),
     });
-    
+
     // Update sync job as failed
     if (jobId) {
       await supabase
@@ -218,7 +218,7 @@ export async function incrementalSyncNotionPages(): Promise<SyncResult> {
         })
         .eq("id", jobId);
     }
-    
+
     throw error;
   }
 }

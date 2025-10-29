@@ -74,4 +74,3 @@ export function logPageSync(
     embeddings_created: embeddingsCreated,
   });
 }
-

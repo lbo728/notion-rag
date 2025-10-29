@@ -58,9 +58,17 @@ export async function POST(request: NextRequest) {
     const contextMessages = await getSessionMessages(sessionId, 10);
 
     // Retrieve relevant documents using MMR (k=8, fetchK=32)
-    const retrievedDocs = await mmrRetrieve(query, 8, 32);
-
-    logger.info("Retrieved documents", { count: retrievedDocs.length });
+    let retrievedDocs;
+    try {
+      retrievedDocs = await mmrRetrieve(query, 8, 32);
+      logger.info("Retrieved documents", { count: retrievedDocs.length });
+    } catch (retrieveError) {
+      logger.error("MMR retrieval failed", {
+        error: retrieveError instanceof Error ? retrieveError.message : String(retrieveError),
+        stack: retrieveError instanceof Error ? retrieveError.stack : undefined,
+      });
+      throw retrieveError;
+    }
 
     // Handle streaming response
     if (useStream) {
@@ -106,12 +114,17 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     logger.error("Error in chat endpoint", {
       error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      errorObject: error,
     });
 
     return NextResponse.json(
       {
         error: "Failed to process chat request",
         message: error instanceof Error ? error.message : String(error),
+        details: process.env.NODE_ENV === "development" 
+          ? (error instanceof Error ? error.stack : String(error))
+          : undefined,
       },
       { status: 500 }
     );

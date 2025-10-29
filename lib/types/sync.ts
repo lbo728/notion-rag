@@ -40,4 +40,3 @@ export interface SyncStatus {
   blocks_processed?: number;
   embeddings_created?: number;
 }
-
