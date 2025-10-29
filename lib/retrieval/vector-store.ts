@@ -27,7 +27,7 @@ export async function saveEmbeddings(
     logger.info("Saving embeddings to vector store", {
       count: chunks.length,
     });
-    
+
     const blocks = chunks.map((chunk, idx) => ({
       page_id: chunk.page_id,
       block_id: chunk.block_ids[0], // Primary block ID
@@ -40,17 +40,17 @@ export async function saveEmbeddings(
         position: idx,
       },
     }));
-    
+
     const { error } = await supabase.from("notion_blocks").upsert(blocks, {
       onConflict: "page_id,block_id",
       ignoreDuplicates: false,
     });
-    
+
     if (error) {
       logger.error("Failed to save embeddings", { error: error.message });
       throw error;
     }
-    
+
     logger.info("Embeddings saved successfully", { count: blocks.length });
   } catch (error) {
     logger.error("Error saving embeddings", {
@@ -73,7 +73,7 @@ export async function vectorSearch(
       fetchK,
       hasFilter: !!filter,
     });
-    
+
     let query = supabase
       .rpc("match_blocks", {
         query_embedding: queryEmbedding,
@@ -81,29 +81,31 @@ export async function vectorSearch(
         match_count: fetchK,
       })
       .select("id, page_id, block_id, content, metadata");
-    
+
     if (filter) {
       Object.entries(filter).forEach(([key, value]) => {
         query = query.eq(key, value);
       });
     }
-    
+
     const { data, error } = await query;
-    
+
     if (error) {
-      logger.error("Vector search failed", { 
+      logger.error("Vector search failed", {
         error: error.message,
         code: error.code,
         details: error.details,
         hint: error.hint,
       });
-      throw new Error(`Vector search failed: ${error.message} (${error.code || 'unknown'}). ${error.hint || ''} If match_blocks function doesn't exist, run the migration SQL.`);
+      throw new Error(
+        `Vector search failed: ${error.message} (${error.code || "unknown"}). ${error.hint || ""} If match_blocks function doesn't exist, run the migration SQL.`
+      );
     }
-    
+
     logger.info("Vector search completed", {
       result_count: data?.length || 0,
     });
-    
+
     return (
       data?.map((item: any) => ({
         id: item.id,
@@ -158,4 +160,3 @@ BEGIN
 END;
 $$;
 `;
-

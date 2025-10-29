@@ -94,28 +94,48 @@ pnpm dev
     },
   ];
 
-  // Add pages
+  // Add pages and blocks
   for (const page of testPages) {
-    // Generate embedding for content
-    const embedding = await generateEmbedding(page.content);
-
-    // Save to notion_blocks
-    const { error } = await supabase.from("notion_blocks").insert({
+    // First, add/update page
+    const { error: pageError } = await supabase.from("notion_pages").upsert({
       page_id: page.page_id,
-      block_id: "main-block",
-      block_type: "paragraph",
-      content: page.content,
-      embedding: embedding,
-      metadata: {
-        title: page.title,
-        block_type: "main",
-      },
+      title: page.title,
+      url: page.url,
+      last_edited_time: new Date().toISOString(),
+      synced_at: new Date().toISOString(),
     });
 
+    if (pageError) {
+      console.error(`Error saving page ${page.page_id}:`, pageError);
+      continue;
+    }
+
+    // Generate embedding for content
+    console.log(`Generating embedding for: ${page.title}...`);
+    const embedding = await generateEmbedding(page.content);
+
+    // Save to notion_blocks with embedding (upsert to update existing)
+    const { error } = await supabase.from("notion_blocks").upsert(
+      {
+        page_id: page.page_id,
+        block_id: `${page.page_id}-main-block`,
+        block_type: "paragraph",
+        content: page.content,
+        embedding: embedding,
+        metadata: {
+          title: page.title,
+          block_type: "main",
+        },
+      },
+      {
+        onConflict: "page_id,block_id",
+      }
+    );
+
     if (error) {
-      console.error(`Error saving ${page.page_id}:`, error);
+      console.error(`Error saving block for ${page.page_id}:`, error);
     } else {
-      console.log(`✓ Added page: ${page.title}`);
+      console.log(`✓ Added/Updated page with embedding: ${page.title}`);
     }
   }
 

@@ -64,7 +64,10 @@ export async function POST(request: NextRequest) {
       logger.info("Retrieved documents", { count: retrievedDocs.length });
     } catch (retrieveError) {
       logger.error("MMR retrieval failed", {
-        error: retrieveError instanceof Error ? retrieveError.message : String(retrieveError),
+        error:
+          retrieveError instanceof Error
+            ? retrieveError.message
+            : String(retrieveError),
         stack: retrieveError instanceof Error ? retrieveError.stack : undefined,
       });
       throw retrieveError;
@@ -122,9 +125,12 @@ export async function POST(request: NextRequest) {
       {
         error: "Failed to process chat request",
         message: error instanceof Error ? error.message : String(error),
-        details: process.env.NODE_ENV === "development" 
-          ? (error instanceof Error ? error.stack : String(error))
-          : undefined,
+        details:
+          process.env.NODE_ENV === "development"
+            ? error instanceof Error
+              ? error.stack
+              : String(error)
+            : undefined,
       },
       { status: 500 }
     );
