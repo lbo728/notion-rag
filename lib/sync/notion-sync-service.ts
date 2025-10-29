@@ -52,7 +52,10 @@ export async function syncNotionPages(): Promise<SyncResult> {
         await syncPage(page.id, result);
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
-        logger.error("Error syncing page", { pageId: page.id, error: errorMsg });
+        logger.error("Error syncing page", {
+          pageId: page.id,
+          error: errorMsg,
+        });
         result.errors.push(`Page ${page.id}: ${errorMsg}`);
       }
     }
@@ -89,7 +92,8 @@ async function syncPage(pageId: string, result: SyncResult) {
   // Fetch page details
   const page = await notionClient.pages.retrieve({ page_id: pageId });
   const title = extractTitle(page);
-  const url = (page as any).url || `https://notion.so/${pageId.replace(/-/g, "")}`;
+  const url =
+    (page as any).url || `https://notion.so/${pageId.replace(/-/g, "")}`;
 
   // Save or update page
   await supabase.from("notion_pages").upsert({
@@ -97,7 +101,8 @@ async function syncPage(pageId: string, result: SyncResult) {
     title,
     url,
     last_edited_time: page.last_edited_time,
-    last_edited_by: page.last_edited_by?.id || page.last_edited_by?.name || null,
+    last_edited_by:
+      page.last_edited_by?.id || page.last_edited_by?.name || null,
     properties: page.properties,
     parent_page_id: (page.parent as any)?.page_id || null,
     workspace_id: (page as any).workspace_id || null,
@@ -107,13 +112,13 @@ async function syncPage(pageId: string, result: SyncResult) {
   // Fetch all blocks for this page
   const blocks = [];
   let cursor = undefined;
-  
+
   do {
     const response = await notionClient.blocks.children.list({
       block_id: pageId,
       start_cursor: cursor,
     });
-    
+
     blocks.push(...response.results);
     cursor = response.next_cursor || undefined;
   } while (cursor);
@@ -121,18 +126,18 @@ async function syncPage(pageId: string, result: SyncResult) {
   // Parse blocks
   const parsedBlocks = parseBlocks(blocks);
   const extractedTexts = extractTextFromBlocks(blocks);
-  
+
   // Chunk text
   const chunks = chunkText(extractedTexts);
   result.blocksProcessed += chunks.length;
 
   // Generate embeddings
   logger.info("Generating embeddings", { chunkCount: chunks.length });
-  
+
   for (const chunk of chunks) {
     try {
       const embedding = await generateEmbedding(chunk.text);
-      
+
       await saveEmbeddings([
         {
           text: chunk.text,
@@ -146,7 +151,7 @@ async function syncPage(pageId: string, result: SyncResult) {
           },
         },
       ]);
-      
+
       result.embeddingsCreated++;
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
@@ -168,12 +173,11 @@ function extractTitle(page: any): string {
       return titleProp.title.map((t: any) => t.plain_text).join("");
     }
   }
-  
+
   // Fallback to page title
   if ((page as any).title) {
     return (page as any).title;
   }
-  
+
   return "Untitled";
 }
-

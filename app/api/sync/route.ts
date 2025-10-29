@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase/client";
 
 /**
  * POST /api/sync
- * 
+ *
  * Trigger manual sync of Notion pages
  */
 export async function POST(request: NextRequest) {
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
 
 /**
  * GET /api/sync
- * 
+ *
  * Get sync status
  */
 export async function GET(request: NextRequest) {

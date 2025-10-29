@@ -1,0 +1,45 @@
+### Notion RAG Chatbot API Tests
+
+### 1. Health Check
+GET http://localhost:3000/api/sync
+Content-Type: application/json
+
+###
+
+### 2. Get Sync Status
+GET http://localhost:3000/api/sync
+Content-Type: application/json
+
+###
+
+### 3. Trigger Sync
+POST http://localhost:3000/api/sync
+Content-Type: application/json
+
+###
+
+### 4. Check Sync Status After Trigger
+GET http://localhost:3000/api/sync
+Content-Type: application/json
+
+###
+
+### 5. Chat Request
+POST http://localhost:3000/api/chat
+Content-Type: application/json
+
+{
+  "query": "프로젝트 설정에 대해 알려줘"
+}
+
+###
+
+### 6. Another Chat Request
+POST http://localhost:3000/api/chat
+Content-Type: application/json
+
+{
+  "query": "Notion workspace의 주요 기능은?"
+}
+
+###
