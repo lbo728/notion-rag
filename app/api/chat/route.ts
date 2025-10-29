@@ -13,7 +13,24 @@ import { composeAnswer } from "@/lib/chat/answer-composer";
  */
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    // Handle both JSON and form-data
+    let body;
+    const contentType = request.headers.get("content-type") || "";
+    
+    if (contentType.includes("application/json")) {
+      body = await request.json();
+    } else if (contentType.includes("multipart/form-data")) {
+      // Parse form data
+      const formData = await request.formData();
+      const queryParam = formData.get("query");
+      body = { query: queryParam };
+    } else {
+      // Try to parse as URL encoded form data
+      const formData = await request.formData();
+      const queryParam = formData.get("query");
+      body = { query: queryParam };
+    }
+    
     const { query } = body;
 
     if (!query || typeof query !== "string") {
