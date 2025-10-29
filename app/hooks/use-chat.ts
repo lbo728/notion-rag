@@ -18,6 +18,7 @@ export function useChat(options: UseChatOptions = {}) {
   const [citations, setCitations] = useState<Citation[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [sessionId, setSessionId] = useState<string | undefined>();
 
   const sendMessage = useCallback(
     async (query: string) => {
@@ -38,7 +39,10 @@ export function useChat(options: UseChatOptions = {}) {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ query }),
+          body: JSON.stringify({ 
+            query,
+            session_id: sessionId,
+          }),
         });
 
         if (!response.ok) {
@@ -46,6 +50,11 @@ export function useChat(options: UseChatOptions = {}) {
         }
 
         const data: ChatApiResponse = await response.json();
+
+        // Update session_id if provided
+        if (data.metadata?.session_id && !sessionId) {
+          setSessionId(data.metadata.session_id);
+        }
 
         const assistantMessage: ChatMessage = {
           role: "assistant",
@@ -77,13 +86,14 @@ export function useChat(options: UseChatOptions = {}) {
         setLoading(false);
       }
     },
-    [loading, options]
+    [loading, options, sessionId]
   );
 
   const clearMessages = useCallback(() => {
     setMessages([]);
     setCitations([]);
     setError(null);
+    setSessionId(undefined);
   }, []);
 
   return {
@@ -91,6 +101,7 @@ export function useChat(options: UseChatOptions = {}) {
     citations,
     loading,
     error,
+    sessionId,
     sendMessage,
     clearMessages,
   };

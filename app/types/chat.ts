@@ -53,5 +53,6 @@ export interface ChatApiResponse {
   metadata: {
     tokens_used: number;
     sources_count: number;
+    session_id?: string;
   };
 }

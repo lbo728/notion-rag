@@ -138,13 +138,13 @@ Next.js App Router structure:
 
 ### Implementation for User Story 2
 
-- [ ] T053 [US2] Create chat session model and storage in lib/types/chat.ts (extends data-model.md)
-- [ ] T054 [US2] Implement session context manager preserving last 10 messages in lib/chat/context-manager.ts
-- [ ] T055 [US2] Add conversation history retrieval from database in lib/chat/session-store.ts
-- [ ] T056 [US2] Update chat API to accept session_id and include context window in app/api/chat/route.ts
-- [ ] T057 [US2] Enhance answer composer to use conversation context in lib/chat/answer-composer.ts
-- [ ] T058 [US2] Add session persistence with chat_sessions and chat_messages tables in lib/chat/session-store.ts
-- [ ] T059 [US2] Update UI to show conversation history in MessageList component in app/components/chat/MessageList.tsx
+- [x] T053 [US2] Create chat session model and storage in lib/types/chat.ts (extends data-model.md)
+- [x] T054 [US2] Implement session context manager preserving last 10 messages in lib/chat/context-manager.ts
+- [x] T055 [US2] Add conversation history retrieval from database in lib/chat/session-store.ts
+- [x] T056 [US2] Update chat API to accept session_id and include context window in app/api/chat/route.ts
+- [x] T057 [US2] Enhance answer composer to use conversation context in lib/chat/answer-composer.ts
+- [x] T058 [US2] Add session persistence with chat_sessions and chat_messages tables in lib/chat/session-store.ts
+- [x] T059 [US2] Update UI to show conversation history in MessageList component in app/components/chat/MessageList.tsx
 
 **Checkpoint**: User Story 2 should work independently with US1
 

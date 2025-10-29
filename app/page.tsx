@@ -6,7 +6,7 @@ import { useState } from "react";
 
 export default function Home() {
   const [query, setQuery] = useState("");
-  const { messages, citations, loading, sendMessage } = useChat();
+  const { messages, citations, loading, sessionId, sendMessage, clearMessages } = useChat();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,10 +29,25 @@ export default function Home() {
       {/* Header */}
       <header className="sticky top-0 z-10 border-b bg-white/50 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold">Notion RAG Chatbot</h1>
-          <p className="text-sm text-gray-600">
-            Personal knowledge archive with Notion integration
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">Notion RAG Chatbot</h1>
+              <p className="text-sm text-gray-600">
+                Personal knowledge archive with Notion integration
+              </p>
+            </div>
+            {sessionId && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-500">Session: {sessionId.slice(0, 8)}...</span>
+                <button
+                  onClick={clearMessages}
+                  className="rounded px-3 py-1 text-xs text-gray-600 hover:bg-gray-100"
+                >
+                  New Chat
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
