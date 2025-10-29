@@ -3,6 +3,8 @@ import { logger } from "@/lib/utils/logger";
 import { mmrRetrieve } from "@/lib/retrieval/mmr-retriever";
 import { composeAnswer } from "@/lib/chat/answer-composer";
 import { composeAnswerStream } from "@/lib/chat/answer-composer-stream";
+import { getOrCreateSession, saveMessage } from "@/lib/chat/session-store";
+import { getSessionMessages } from "@/lib/chat/context-manager";
 
 /**
  * POST /api/chat
@@ -15,7 +17,7 @@ import { composeAnswerStream } from "@/lib/chat/answer-composer-stream";
 export async function POST(request: NextRequest) {
   try {
     // Handle both JSON and form-data
-    let body;
+    let body: any;
     const contentType = request.headers.get("content-type") || "";
 
     if (contentType.includes("application/json")) {
@@ -24,24 +26,36 @@ export async function POST(request: NextRequest) {
       // Parse form data
       const formData = await request.formData();
       const queryParam = formData.get("query");
-      body = { query: queryParam };
+      const sessionIdParam = formData.get("session_id") as string | null;
+      body = { query: queryParam, session_id: sessionIdParam ?? undefined };
     } else {
       // Try to parse as URL encoded form data
       const formData = await request.formData();
       const queryParam = formData.get("query");
-      body = { query: queryParam };
+      const sessionIdParam = formData.get("session_id") as string | null;
+      body = { query: queryParam, session_id: sessionIdParam ?? undefined };
     }
 
-    const { query, stream: useStream } = body;
+    const { query, stream: useStream, session_id } = body;
 
     if (!query || typeof query !== "string") {
       return NextResponse.json({ error: "Query is required" }, { status: 400 });
     }
 
+    // Create or reuse session
+    const sessionId = await getOrCreateSession(session_id);
+
     logger.info("Chat request received", {
       query_length: query.length,
       streaming: !!useStream,
+      session_id: sessionId,
     });
+
+    // Persist user message
+    await saveMessage({ session_id: sessionId, role: "user", content: query });
+
+    // Load last 10 messages as context
+    const contextMessages = await getSessionMessages(sessionId, 10);
 
     // Retrieve relevant documents using MMR (k=8, fetchK=32)
     const retrievedDocs = await mmrRetrieve(query, 8, 32);
@@ -50,9 +64,10 @@ export async function POST(request: NextRequest) {
 
     // Handle streaming response
     if (useStream) {
-      const { stream, citations } = await composeAnswerStream(
+      const { stream } = await composeAnswerStream(
         query,
-        retrievedDocs
+        retrievedDocs,
+        contextMessages
       );
 
       return new Response(stream, {
@@ -64,12 +79,19 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Non-streaming response (existing behavior)
-    const answer = await composeAnswer(query, retrievedDocs);
+    // Non-streaming response (existing behavior + context)
+    const answer = await composeAnswer(query, retrievedDocs, contextMessages);
 
     logger.info("Answer composed", {
       citations_count: answer.citations.length,
       tokens_used: answer.tokens_used,
+    });
+
+    // Persist assistant message
+    await saveMessage({
+      session_id: sessionId,
+      role: "assistant",
+      content: answer.content,
     });
 
     return NextResponse.json({
@@ -78,6 +100,7 @@ export async function POST(request: NextRequest) {
       metadata: {
         tokens_used: answer.tokens_used,
         sources_count: retrievedDocs.length,
+        session_id: sessionId,
       },
     });
   } catch (error) {

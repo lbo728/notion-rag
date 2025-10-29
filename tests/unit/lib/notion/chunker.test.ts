@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { chunkText, Chunk, DEFAULT_CHUNKING_CONFIG } from "@/lib/notion/chunker";
+import {
+  chunkText,
+  Chunk,
+  DEFAULT_CHUNKING_CONFIG,
+} from "@/lib/notion/chunker";
 import { ExtractedText } from "@/lib/notion/text-extractor";
 
 describe("chunker - header-aware grouping", () => {
@@ -133,7 +137,7 @@ describe("chunker - header-aware grouping", () => {
     const chunks = chunkText(blocks);
 
     expect(chunks.length).toBeGreaterThan(0);
-    
+
     // Verify all block_ids are preserved
     const allBlockIds = chunks.flatMap((chunk) => chunk.block_ids);
     expect(allBlockIds).toContain("block-1");
@@ -200,8 +204,10 @@ describe("chunker - header-aware grouping", () => {
     const chunks = chunkText(blocks, 400);
 
     // Headers should not be split from their content
-    const headerChunks = chunks.filter((chunk) =>
-      chunk.text.includes("# Main Title") || chunk.text.includes("## Subsection")
+    const headerChunks = chunks.filter(
+      (chunk) =>
+        chunk.text.includes("# Main Title") ||
+        chunk.text.includes("## Subsection")
     );
 
     expect(headerChunks.length).toBeGreaterThan(0);
@@ -233,4 +239,3 @@ describe("chunker - configuration", () => {
     expect(chunks.length).toBeGreaterThanOrEqual(1);
   });
 });
-

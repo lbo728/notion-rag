@@ -95,7 +95,7 @@ describe("MMR Retriever", () => {
         page_id: "page-2",
         block_id: "block-2",
         content: "Similar content A", // Similar content to first
-        similarity: 0.90,
+        similarity: 0.9,
         metadata: { title: "Title 2", type: "paragraph" },
       },
       {
@@ -109,7 +109,7 @@ describe("MMR Retriever", () => {
         page_id: "page-4",
         block_id: "block-4",
         content: "Another different content C",
-        similarity: 0.80,
+        similarity: 0.8,
         metadata: { title: "Title 4", type: "paragraph" },
       },
     ];
@@ -121,7 +121,7 @@ describe("MMR Retriever", () => {
 
     expect(results).toHaveLength(3);
     expect(results[0].mmr_score).toBeGreaterThanOrEqual(0);
-    
+
     // First result should have highest relevance
     expect(results[0].similarity).toBeGreaterThanOrEqual(results[1].similarity);
   });
@@ -181,4 +181,3 @@ describe("MMR Retriever", () => {
     await expect(mmrRetrieve(mockQuery, 8, 32)).rejects.toThrow(error);
   });
 });
-

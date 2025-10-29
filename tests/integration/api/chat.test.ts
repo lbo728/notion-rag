@@ -34,7 +34,7 @@ describe("POST /api/chat", () => {
         page_id: "page-2",
         block_id: "block-2",
         content: "Test content 2",
-        similarity: 0.90,
+        similarity: 0.9,
         mmr_score: 0.88,
         metadata: { title: "Title 2", type: "paragraph" },
       },
@@ -81,10 +81,7 @@ describe("POST /api/chat", () => {
     expect(data.metadata).toHaveProperty("sources_count");
 
     expect(mmrRetrieve).toHaveBeenCalledWith("test query", 8, 32);
-    expect(composeAnswer).toHaveBeenCalledWith(
-      "test query",
-      mockRetrievedDocs
-    );
+    expect(composeAnswer).toHaveBeenCalledWith("test query", mockRetrievedDocs);
   });
 
   it("should return 400 when query is missing", async () => {
@@ -187,9 +184,7 @@ describe("POST /api/chat", () => {
   });
 
   it("should handle errors gracefully", async () => {
-    vi.mocked(mmrRetrieve).mockRejectedValue(
-      new Error("Retrieval failed")
-    );
+    vi.mocked(mmrRetrieve).mockRejectedValue(new Error("Retrieval failed"));
 
     const request = new NextRequest("http://localhost:3000/api/chat", {
       method: "POST",
@@ -221,7 +216,7 @@ describe("POST /api/chat", () => {
         page_id: "page-2",
         block_id: "block-2",
         content: "Test content 2",
-        similarity: 0.90,
+        similarity: 0.9,
         mmr_score: 0.88,
         metadata: { title: "Title 2", type: "paragraph" },
       },
@@ -264,4 +259,3 @@ describe("POST /api/chat", () => {
     expect(data.citations.length).toBeGreaterThanOrEqual(2);
   });
 });
-

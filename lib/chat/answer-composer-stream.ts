@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { MMRResult } from "@/lib/retrieval/mmr-retriever";
 import { logger } from "@/lib/utils/logger";
+import { SessionMessage } from "@/lib/types/chat";
 
 const openaiClient = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -24,7 +25,8 @@ export interface StreamingResponse {
  */
 export async function composeAnswerStream(
   query: string,
-  retrievedDocs: MMRResult[]
+  retrievedDocs: MMRResult[],
+  contextMessages?: SessionMessage[]
 ): Promise<StreamingResponse> {
   if (retrievedDocs.length === 0) {
     // Return empty stream with error message
@@ -52,32 +54,44 @@ export async function composeAnswerStream(
   const docsToUse = retrievedDocs.length >= 2 ? retrievedDocs : retrievedDocs;
 
   // Format context from retrieved documents
-  const context = docsToUse
+  const retrievalContext = docsToUse
     .map(
       (doc, idx) =>
         `[Source ${idx + 1}]\n${doc.content}\n---\nPage ID: ${doc.page_id}\nBlock ID: ${doc.block_id}`
     )
     .join("\n\n");
 
-  // Compose prompt
+  // Compose prompt with conversation context
+  const conversationContext =
+    contextMessages && contextMessages.length > 0
+      ? contextMessages
+          .map((m) => `${m.role.toUpperCase()}: ${m.content}`)
+          .join("\n")
+      : "";
+
   const prompt = `You are a helpful assistant that answers questions based on a personal knowledge archive from Notion.
 
 QUESTION: ${query}
 
+CONVERSATION CONTEXT (last ${contextMessages?.length ?? 0} messages):
+${conversationContext}
+
 RELEVANT CONTENT:
-${context}
+${retrievalContext}
 
 INSTRUCTIONS:
 1. Provide a concise, helpful answer based on the relevant content above
 2. Use the "summary + quote" format: Give a brief summary, then include direct quotes from the sources
 3. Keep the answer concise and focused on the question
 4. If information is missing, say so rather than inventing facts
+5. Use the conversation context to maintain continuity if relevant
 
 ANSWER:`;
 
   logger.info("Composing streaming answer with LLM", {
     query_length: query.length,
     sources_count: docsToUse.length,
+    context_messages: contextMessages?.length ?? 0,
   });
 
   // Create OpenAI streaming response

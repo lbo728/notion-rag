@@ -23,7 +23,9 @@ test.describe("Chat E2E", () => {
     await sendButton.click();
 
     // Wait for response (loading state should appear first)
-    await expect(page.locator("text=Thinking...").or(page.locator("text=프로젝트 설정"))).toBeVisible({
+    await expect(
+      page.locator("text=Thinking...").or(page.locator("text=프로젝트 설정"))
+    ).toBeVisible({
       timeout: 30000,
     });
 
@@ -70,11 +72,11 @@ test.describe("Chat E2E", () => {
     await page.goto("/");
 
     const sendButton = page.locator('button[type="submit"]');
-    
+
     // Button should be disabled for empty input
     const input = page.locator('input[type="text"]');
     await expect(input).toHaveValue("");
-    
+
     // Try to click - button should be disabled or form should not submit
     const isDisabled = await sendButton.getAttribute("disabled");
     expect(isDisabled).not.toBeNull();
@@ -112,7 +114,10 @@ test.describe("Chat E2E", () => {
     await page.waitForTimeout(5000);
 
     // Check if citations section exists (may not appear if no data)
-    const hasCitations = await page.locator("text=Sources:").isVisible().catch(() => false);
+    const hasCitations = await page
+      .locator("text=Sources:")
+      .isVisible()
+      .catch(() => false);
 
     if (hasCitations) {
       // Verify citation links are present
@@ -123,7 +128,7 @@ test.describe("Chat E2E", () => {
         // Verify citation format
         const firstCitation = citationLinks.first();
         await expect(firstCitation).toBeVisible();
-        
+
         // Should have relevance score displayed
         const relevanceText = page.locator("text=/relevance:/");
         await expect(relevanceText.first()).toBeVisible();
@@ -131,4 +136,3 @@ test.describe("Chat E2E", () => {
     }
   });
 });
-

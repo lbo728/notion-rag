@@ -51,7 +51,7 @@ describe("Answer Composer", () => {
         page_id: "page-2",
         block_id: "block-2",
         content: "Additional information on the same topic.",
-        similarity: 0.90,
+        similarity: 0.9,
         mmr_score: 0.88,
         metadata: {
           title: "Test Document 2",
@@ -64,7 +64,8 @@ describe("Answer Composer", () => {
       choices: [
         {
           message: {
-            content: "This is a summary of the information. According to the sources, 'relevant content about the topic' and 'additional information on the same topic'.",
+            content:
+              "This is a summary of the information. According to the sources, 'relevant content about the topic' and 'additional information on the same topic'.",
           },
         },
       ],
@@ -324,7 +325,7 @@ describe("Answer Composer", () => {
         page_id: "page-2",
         block_id: "block-2",
         content: "Content 2",
-        similarity: 0.90,
+        similarity: 0.9,
         mmr_score: 0.88,
         metadata: {
           title: "Title 2",
@@ -361,4 +362,3 @@ describe("Answer Composer", () => {
     expect(userMessage.content).toContain("block-2");
   });
 });
-
