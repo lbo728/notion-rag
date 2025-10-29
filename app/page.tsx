@@ -1,66 +1,28 @@
 "use client";
 
+import { ChatMessage, Citation } from "@/app/types/chat";
+import { useChat } from "@/app/hooks/use-chat";
 import { useState } from "react";
-
-interface Citation {
-  title: string;
-  url: string;
-  snippet: string;
-  relevance_score: number;
-}
-
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-  citations?: Citation[];
-}
 
 export default function Home() {
   const [query, setQuery] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(false);
+  const { messages, citations, loading, sendMessage } = useChat();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim() || loading) return;
 
-    const userMessage: Message = { role: "user", content: query };
-    setMessages((prev) => [...prev, userMessage]);
     setQuery("");
-    setLoading(true);
-
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to get response");
-      }
-
-      const data = await response.json();
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: data.content,
-        citations: data.citations,
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error) {
-      console.error("Error:", error);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "Sorry, I encountered an error. Please try again.",
-        },
-      ]);
-    } finally {
-      setLoading(false);
-    }
+    await sendMessage(query);
   };
+
+  // Merge citations with messages
+  const messagesWithCitations = messages.map((msg, idx) => {
+    if (msg.role === "assistant" && idx === messages.length - 1) {
+      return { ...msg, citations };
+    }
+    return msg;
+  });
 
   return (
     <main className="flex min-h-screen flex-col">
@@ -86,7 +48,11 @@ export default function Home() {
             </div>
           )}
 
-          {messages.map((msg, idx) => (
+          {messagesWithCitations.map((msg, idx) => {
+            const citationsForMessage = 
+              msg.role === "assistant" && idx === messages.length - 1 ? citations : undefined;
+            
+            return (
             <div
               key={idx}
               className={`rounded-lg p-4 ${
@@ -96,11 +62,11 @@ export default function Home() {
               }`}
             >
               <p className="whitespace-pre-wrap">{msg.content}</p>
-              {msg.citations && msg.citations.length > 0 && (
+              {citationsForMessage && citationsForMessage.length > 0 && (
                 <div className="mt-3 border-t pt-3">
                   <p className="mb-2 text-xs font-semibold">Sources:</p>
                   <ul className="space-y-1">
-                    {msg.citations.map((cite, i) => (
+                    {citationsForMessage.map((cite, i) => (
                       <li key={i} className="text-xs">
                         <a
                           href={cite.url}
@@ -119,7 +85,8 @@ export default function Home() {
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
 
           {loading && (
             <div className="max-w-[90%] rounded-lg bg-gray-100 p-4">

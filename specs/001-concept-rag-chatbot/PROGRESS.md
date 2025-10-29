@@ -9,10 +9,12 @@
 ### ✅ Completed Phases
 
 #### Phase 1: Setup (100% Complete)
+
 - ✅ T001-T007: Project initialization, dependencies, configuration
 - All infrastructure setup complete
 
-#### Phase 2: Foundational (100% Complete)  
+#### Phase 2: Foundational (100% Complete)
+
 - ✅ T008-T014: Database setup
 - ✅ T015: Database migrations executed via Supabase MCP
 - ✅ T016-T020: Notion integration (API client, listing, fetching, parsing, extraction)
@@ -22,6 +24,7 @@
 #### Phase 3: User Story 1 (85% Complete)
 
 **Completed Tasks**:
+
 - ✅ T036: MMR retriever (k=8, fetchK=32)
 - ✅ T037: Vector similarity search with pgvector
 - ✅ T038: Answer composer with summary + citations
@@ -36,11 +39,13 @@
 - ✅ T048: Chat page UI
 
 **Remaining Tasks** (Phase 3):
+
 - ⏳ T047: Streaming support for chat responses
 - ⏳ T049: TanStack Query hooks
 - ⏳ T050: TypeScript types for messages and citations
 
 **Test Tasks Not Started**:
+
 - T031-T035: Tests for User Story 1
 
 ---
@@ -48,10 +53,11 @@
 ## Implementation Statistics
 
 ### Code Completed
+
 - **Database Migrations**: 6 files (including complete migration script)
 - **API Endpoints**: 2 (`/api/chat`, `/api/sync`)
 - **UI Components**: 1 main page with chat interface
-- **Core Libraries**: 
+- **Core Libraries**:
   - Notion API client
   - Embedding generation (OpenAI)
   - MMR retriever
@@ -59,6 +65,7 @@
   - Answer composer
 
 ### Commits
+
 - **Total**: 11 commits
 - **Latest**: `dd6bf1a` - docs: Update tasks.md to reflect completed Phase 3 implementation
 - **Branch**: `001-concept-rag-chatbot`
@@ -69,6 +76,7 @@
 ## Next Steps
 
 ### Immediate (High Priority)
+
 1. **Complete Phase 3 remaining tasks**:
    - Add streaming support (T047)
    - Create TanStack Query hooks (T049)
@@ -82,11 +90,13 @@
    - E2E test for chat flow
 
 ### Short-term (Medium Priority)
+
 3. **Phase 4: User Story 2** - Multi-turn conversation context
 4. **Phase 5: User Story 3** - Incremental sync (partially implemented)
 5. **Phase 6: User Story 4** - Collections/bookmarks
 
 ### Long-term (Low Priority)
+
 6. **Phase 7: Polish** - Metrics, logging, documentation
 
 ---
@@ -113,11 +123,10 @@
 
 ## Blockers
 
-1. **No Test Data with Embeddings**: 
+1. **No Test Data with Embeddings**:
    - Test pages exist but no embeddings
    - Need to generate embeddings for test data
-   
-2. **Notion API Connection**: 
+2. **Notion API Connection**:
    - Notion workspace not connected
    - Need to add Notion integration
 
@@ -131,4 +140,3 @@
 4. **Long-term**: Implement remaining user stories (US2, US3, US4)
 
 **Estimated Time to MVP**: 2-3 days (assuming test data addition and remaining Phase 3 tasks)
-
