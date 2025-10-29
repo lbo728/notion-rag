@@ -39,7 +39,7 @@ export function useChat(options: UseChatOptions = {}) {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ 
+          body: JSON.stringify({
             query,
             session_id: sessionId,
           }),

@@ -133,8 +133,8 @@ Next.js App Router structure:
 
 ### Tests for User Story 2
 
-- [ ] T051 [P] [US2] Unit test for context window management in tests/unit/lib/chat/context-manager.test.ts
-- [ ] T052 [P] [US2] Integration test for multi-turn conversation in tests/integration/api/multi-turn-chat.test.ts
+- [x] T051 [P] [US2] Unit test for context window management in tests/unit/lib/chat/context-manager.test.ts
+- [x] T052 [P] [US2] Integration test for multi-turn conversation in tests/integration/api/multi-turn-chat.test.ts
 
 ### Implementation for User Story 2
 

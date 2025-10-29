@@ -6,7 +6,14 @@ import { useState } from "react";
 
 export default function Home() {
   const [query, setQuery] = useState("");
-  const { messages, citations, loading, sessionId, sendMessage, clearMessages } = useChat();
+  const {
+    messages,
+    citations,
+    loading,
+    sessionId,
+    sendMessage,
+    clearMessages,
+  } = useChat();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +45,9 @@ export default function Home() {
             </div>
             {sessionId && (
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">Session: {sessionId.slice(0, 8)}...</span>
+                <span className="text-xs text-gray-500">
+                  Session: {sessionId.slice(0, 8)}...
+                </span>
                 <button
                   onClick={clearMessages}
                   className="rounded px-3 py-1 text-xs text-gray-600 hover:bg-gray-100"
