@@ -22,6 +22,7 @@
 #### 2. Supabase 프로젝트 설정
 
 프로젝트 생성 완료 후:
+
 1. Settings → API → API Keys 복사
    - `URL` (예: https://xxx.supabase.co)
    - `anon public` key
@@ -65,6 +66,7 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 2. 아래 파일들을 순서대로 실행:
 
 **파일 1**: `database/migrations/001_create_notion_pages.sql`
+
 ```sql
 -- Enable pgvector extension
 CREATE EXTENSION IF NOT EXISTS vector;
@@ -73,26 +75,31 @@ CREATE EXTENSION IF NOT EXISTS vector;
 ```
 
 **파일 2**: `database/migrations/002_create_notion_blocks.sql`
+
 ```sql
 -- (파일 내용 복사해서 실행)
 ```
 
 **파일 3**: `database/migrations/003_create_chat_tables.sql`
+
 ```sql
 -- (파일 내용 복사해서 실행)
 ```
 
 **파일 4**: `database/migrations/004_create_collections.sql`
+
 ```sql
 -- (파일 내용 복사해서 실행)
 ```
 
 **파일 5**: `database/migrations/005_create_sync_jobs.sql`
+
 ```sql
 -- (파일 내용 복사해서 실행)
 ```
 
 **추가로 실행**: Vector search function
+
 ```sql
 -- lib/retrieval/vector-store.ts의 CREATE_MATCH_BLOCKS_FUNCTION 내용 실행
 CREATE OR REPLACE FUNCTION match_blocks (
@@ -143,6 +150,7 @@ supabase db push
 #### 5. 검증
 
 Supabase Dashboard → Table Editor에서 확인:
+
 - `notion_pages` 테이블 존재
 - `notion_blocks` 테이블 존재
 - `chat_sessions`, `chat_messages`, `chat_citations` 테이블 존재
@@ -176,6 +184,7 @@ Supabase Dashboard → Table Editor에서 확인:
 #### 2. .env.local에 추가
 
 위에서 만든 `.env.local` 파일에:
+
 ```env
 GOOGLE_CLIENT_ID=your_client_id_here
 GOOGLE_CLIENT_SECRET=your_client_secret_here
@@ -256,20 +265,22 @@ pnpm dev
 ## 문제 해결
 
 ### Supabase 연결 에러
+
 - `.env.local` 파일이 올바른지 확인
 - Supabase 프로젝트가 활성화되어 있는지 확인
 - Anon key가 올바른지 확인
 
 ### Google OAuth 에러
+
 - Google Console에서 redirect URI가 정확한지 확인
 - 테스트 사용자로 등록된 이메일로 로그인 시도
 - 클라이언트 ID/Secret이 올바른지 확인
 
 ### Migration 에러
+
 - pgvector extension이 활성화되었는지 확인
 - SQL 문법이 올바른지 확인 (쉼표, 세미콜론 등)
 
 ---
 
 **작업 완료 후**: `/speckit.implement` 명령어로 T015, T027를 체크하고 Phase 3로 진행하세요!
-
