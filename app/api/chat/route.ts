@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     // Handle both JSON and form-data
     let body;
     const contentType = request.headers.get("content-type") || "";
-    
+
     if (contentType.includes("application/json")) {
       body = await request.json();
     } else if (contentType.includes("multipart/form-data")) {
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       const queryParam = formData.get("query");
       body = { query: queryParam };
     }
-    
+
     const { query } = body;
 
     if (!query || typeof query !== "string") {
