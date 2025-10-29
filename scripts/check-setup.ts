@@ -1,6 +1,10 @@
 import dotenv from "dotenv";
-dotenv.config({ path: ".env.local" });
+import { resolve } from "path";
 
+// Load environment variables FIRST before importing modules that depend on them
+dotenv.config({ path: resolve(process.cwd(), ".env.local") });
+
+// Now import modules that depend on environment variables
 import { supabase } from "../lib/supabase/client";
 
 async function checkSetup() {
@@ -31,7 +35,9 @@ async function checkSetup() {
     console.log("✅ match_blocks function exists\n");
   } else {
     console.error("❌ match_blocks function not found or error");
-    console.log("   Run migration: database/migrations/006_create_vector_search_function.sql\n");
+    console.log(
+      "   Run migration: database/migrations/006_create_vector_search_function.sql\n"
+    );
   }
 
   // 3. Check data
@@ -54,7 +60,9 @@ async function checkSetup() {
   console.log(`   Blocks with embeddings: ${embeddingCount || 0}\n`);
 
   if ((embeddingCount || 0) === 0) {
-    console.log("⚠️  No embeddings found! Run: pnpm tsx scripts/add-test-data.ts\n");
+    console.log(
+      "⚠️  No embeddings found! Run: pnpm tsx scripts/add-test-data.ts\n"
+    );
   } else {
     console.log("✅ Data available\n");
   }
@@ -78,4 +86,3 @@ async function checkSetup() {
 }
 
 checkSetup().catch(console.error);
-
