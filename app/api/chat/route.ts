@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/utils/logger";
 import { mmrRetrieve } from "@/lib/retrieval/mmr-retriever";
 import { composeAnswer } from "@/lib/chat/answer-composer";
+import { composeAnswerStream } from "@/lib/chat/answer-composer-stream";
 
 /**
  * POST /api/chat
@@ -9,7 +10,7 @@ import { composeAnswer } from "@/lib/chat/answer-composer";
  * Chat endpoint that:
  * 1. Retrieves relevant documents using MMR
  * 2. Generates answer with citations using GPT-4o-mini
- * 3. Returns formatted response
+ * 3. Returns formatted response (streaming or non-streaming)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -31,20 +32,33 @@ export async function POST(request: NextRequest) {
       body = { query: queryParam };
     }
 
-    const { query } = body;
+    const { query, stream: useStream } = body;
 
     if (!query || typeof query !== "string") {
       return NextResponse.json({ error: "Query is required" }, { status: 400 });
     }
 
-    logger.info("Chat request received", { query_length: query.length });
+    logger.info("Chat request received", { query_length: query.length, streaming: !!useStream });
 
     // Retrieve relevant documents using MMR (k=8, fetchK=32)
     const retrievedDocs = await mmrRetrieve(query, 8, 32);
 
     logger.info("Retrieved documents", { count: retrievedDocs.length });
 
-    // Compose answer with citations
+    // Handle streaming response
+    if (useStream) {
+      const { stream, citations } = await composeAnswerStream(query, retrievedDocs);
+
+      return new Response(stream, {
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
+        },
+      });
+    }
+
+    // Non-streaming response (existing behavior)
     const answer = await composeAnswer(query, retrievedDocs);
 
     logger.info("Answer composed", {

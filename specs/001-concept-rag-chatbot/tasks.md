@@ -116,7 +116,7 @@ Next.js App Router structure:
 - [x] T044 [US1] Create ChatInterface component with message input in app/components/chat/ChatInterface.tsx
 - [x] T045 [US1] Implement MessageList component displaying messages with citations in app/components/chat/MessageList.tsx
 - [x] T046 [US1] Create CitationLink component rendering clickable Notion page/block links in app/components/chat/CitationLink.tsx
-- [ ] T047 [US1] Add streaming support for chat responses in app/api/chat/route.ts
+- [x] T047 [US1] Add streaming support for chat responses in app/api/chat/route.ts
 - [x] T048 [US1] Implement chat page with UI integration in app/(chat)/page.tsx
 - [x] T049 [US1] Add TanStack Query hooks for chat API calls in app/hooks/use-chat.ts
 - [x] T050 [US1] Create TypeScript types for chat messages and citations in app/types/chat.ts

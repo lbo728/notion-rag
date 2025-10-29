@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { ChatMessage, Citation, ChatApiRequest, ChatApiResponse } from "@/app/types/chat";
+import {
+  ChatMessage,
+  Citation,
+  ChatApiRequest,
+  ChatApiResponse,
+} from "@/app/types/chat";
 
 export interface UseChatOptions {
   onError?: (error: Error) => void;
@@ -56,7 +61,7 @@ export function useChat(options: UseChatOptions = {}) {
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
         setError(error);
-        
+
         setMessages((prev) => [
           ...prev,
           {
@@ -90,4 +95,3 @@ export function useChat(options: UseChatOptions = {}) {
     clearMessages,
   };
 }
-

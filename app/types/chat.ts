@@ -55,4 +55,3 @@ export interface ChatApiResponse {
     sources_count: number;
   };
 }
-

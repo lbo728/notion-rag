@@ -49,42 +49,44 @@ export default function Home() {
           )}
 
           {messagesWithCitations.map((msg, idx) => {
-            const citationsForMessage = 
-              msg.role === "assistant" && idx === messages.length - 1 ? citations : undefined;
-            
+            const citationsForMessage =
+              msg.role === "assistant" && idx === messages.length - 1
+                ? citations
+                : undefined;
+
             return (
-            <div
-              key={idx}
-              className={`rounded-lg p-4 ${
-                msg.role === "user"
-                  ? "ml-auto max-w-[80%] bg-blue-100"
-                  : "mr-auto max-w-[90%] bg-gray-100"
-              }`}
-            >
-              <p className="whitespace-pre-wrap">{msg.content}</p>
-              {citationsForMessage && citationsForMessage.length > 0 && (
-                <div className="mt-3 border-t pt-3">
-                  <p className="mb-2 text-xs font-semibold">Sources:</p>
-                  <ul className="space-y-1">
-                    {citationsForMessage.map((cite, i) => (
-                      <li key={i} className="text-xs">
-                        <a
-                          href={cite.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline"
-                        >
-                          • {cite.title}
-                        </a>
-                        <span className="ml-2 text-gray-500">
-                          (relevance: {cite.relevance_score.toFixed(2)})
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
+              <div
+                key={idx}
+                className={`rounded-lg p-4 ${
+                  msg.role === "user"
+                    ? "ml-auto max-w-[80%] bg-blue-100"
+                    : "mr-auto max-w-[90%] bg-gray-100"
+                }`}
+              >
+                <p className="whitespace-pre-wrap">{msg.content}</p>
+                {citationsForMessage && citationsForMessage.length > 0 && (
+                  <div className="mt-3 border-t pt-3">
+                    <p className="mb-2 text-xs font-semibold">Sources:</p>
+                    <ul className="space-y-1">
+                      {citationsForMessage.map((cite, i) => (
+                        <li key={i} className="text-xs">
+                          <a
+                            href={cite.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                          >
+                            • {cite.title}
+                          </a>
+                          <span className="ml-2 text-gray-500">
+                            (relevance: {cite.relevance_score.toFixed(2)})
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
             );
           })}
 
