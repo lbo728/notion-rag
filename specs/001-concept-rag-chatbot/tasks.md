@@ -54,7 +54,7 @@ Next.js App Router structure:
 - [x] T012 [P] Create database migration: Create collections and collection_conversations tables with GIN indexes in database/migrations/004_create_collections.sql
 - [x] T013 [P] Create database migration: Create sync_jobs table in database/migrations/005_create_sync_jobs.sql
 - [x] T014 Create database schema types: Generate TypeScript types from Supabase schema in lib/supabase/types.ts
-- [ ] T015 Run database migrations and verify Supabase pgvector extension is enabled
+- [x] T015 Run database migrations and verify Supabase pgvector extension is enabled
 
 ### Notion Integration - Milestone 1
 
@@ -102,22 +102,22 @@ Next.js App Router structure:
 
 ### Implementation for User Story 1 - Milestone 3: Search/Generation API
 
-- [ ] T036 [US1] Implement MMR retriever with k=8, fetchK=32 and relevance scoring in lib/retrieval/mmr-retriever.ts
-- [ ] T037 [US1] Create vector similarity search query with pgvector in lib/retrieval/vector-store.ts
-- [ ] T038 [US1] Implement answer composer generating summary + quote with minimum 2 citations in lib/chat/answer-composer.ts
-- [ ] T039 [US1] Add token guard limiting response size in lib/chat/answer-composer.ts
-- [ ] T040 [US1] Implement chat API route handler in app/api/chat/route.ts
-- [ ] T041 [US1] Add GPT-4o-mini integration for response generation in lib/chat/llm-client.ts
-- [ ] T042 [US1] Implement citation link extractor with page_id and block_id in lib/chat/citation-extractor.ts
-- [ ] T043 [US1] Add request validation and error handling for chat endpoint in app/api/chat/route.ts
+- [x] T036 [US1] Implement MMR retriever with k=8, fetchK=32 and relevance scoring in lib/retrieval/mmr-retriever.ts
+- [x] T037 [US1] Create vector similarity search query with pgvector in lib/retrieval/vector-store.ts
+- [x] T038 [US1] Implement answer composer generating summary + quote with minimum 2 citations in lib/chat/answer-composer.ts
+- [x] T039 [US1] Add token guard limiting response size in lib/chat/answer-composer.ts
+- [x] T040 [US1] Implement chat API route handler in app/api/chat/route.ts
+- [x] T041 [US1] Add GPT-4o-mini integration for response generation in lib/chat/llm-client.ts
+- [x] T042 [US1] Implement citation link extractor with page_id and block_id in lib/chat/citation-extractor.ts
+- [x] T043 [US1] Add request validation and error handling for chat endpoint in app/api/chat/route.ts
 
 ### Implementation for User Story 1 - Milestone 4: Chat UI
 
-- [ ] T044 [US1] Create ChatInterface component with message input in app/components/chat/ChatInterface.tsx
-- [ ] T045 [US1] Implement MessageList component displaying messages with citations in app/components/chat/MessageList.tsx
-- [ ] T046 [US1] Create CitationLink component rendering clickable Notion page/block links in app/components/chat/CitationLink.tsx
+- [x] T044 [US1] Create ChatInterface component with message input in app/components/chat/ChatInterface.tsx
+- [x] T045 [US1] Implement MessageList component displaying messages with citations in app/components/chat/MessageList.tsx
+- [x] T046 [US1] Create CitationLink component rendering clickable Notion page/block links in app/components/chat/CitationLink.tsx
 - [ ] T047 [US1] Add streaming support for chat responses in app/api/chat/route.ts
-- [ ] T048 [US1] Implement chat page with UI integration in app/(chat)/page.tsx
+- [x] T048 [US1] Implement chat page with UI integration in app/(chat)/page.tsx
 - [ ] T049 [US1] Add TanStack Query hooks for chat API calls in app/hooks/use-chat.ts
 - [ ] T050 [US1] Create TypeScript types for chat messages and citations in app/types/chat.ts
 
