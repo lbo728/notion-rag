@@ -7,6 +7,8 @@ import { parseBlocks } from "@/lib/notion/parser";
 import { extractTextFromBlocks } from "@/lib/notion/text-extractor";
 import { saveEmbeddings } from "@/lib/retrieval/vector-store";
 import { logger } from "@/lib/utils/logger";
+import { SyncJobType } from "@/lib/types/sync";
+import { preserveProperties } from "./property-preserver";
 
 export interface SyncResult {
   pagesProcessed: number;
@@ -16,7 +18,26 @@ export interface SyncResult {
 }
 
 /**
- * Synchronize all Notion pages to Supabase
+ * Get the last successful sync time from sync_jobs table
+ */
+async function getLastSyncTime(): Promise<Date | null> {
+  const { data, error } = await supabase
+    .from("sync_jobs")
+    .select("completed_at")
+    .eq("status", "completed")
+    .order("completed_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error || !data?.completed_at) {
+    return null;
+  }
+
+  return new Date(data.completed_at);
+}
+
+/**
+ * Synchronize all Notion pages to Supabase (full sync)
  */
 export async function syncNotionPages(): Promise<SyncResult> {
   const result: SyncResult = {
@@ -33,7 +54,7 @@ export async function syncNotionPages(): Promise<SyncResult> {
     const { data: job } = await supabase
       .from("sync_jobs")
       .insert({
-        job_type: "full_sync",
+        job_type: "manual" as SyncJobType,
         status: "running",
       })
       .select()
@@ -81,6 +102,123 @@ export async function syncNotionPages(): Promise<SyncResult> {
     logger.error("Error in Notion sync", {
       error: error instanceof Error ? error.message : String(error),
     });
+    
+    // Update sync job as failed
+    if (jobId) {
+      await supabase
+        .from("sync_jobs")
+        .update({
+          status: "failed",
+          completed_at: new Date().toISOString(),
+          error_message: error instanceof Error ? error.message : String(error),
+        })
+        .eq("id", jobId);
+    }
+    
+    throw error;
+  }
+}
+
+/**
+ * Incremental sync: Only sync pages changed since last sync
+ */
+export async function incrementalSyncNotionPages(): Promise<SyncResult> {
+  const result: SyncResult = {
+    pagesProcessed: 0,
+    blocksProcessed: 0,
+    embeddingsCreated: 0,
+    errors: [],
+  };
+
+  try {
+    logger.info("Starting incremental Notion sync");
+
+    // Get last sync time
+    const lastSyncTime = await getLastSyncTime();
+    
+    if (!lastSyncTime) {
+      logger.info("No previous sync found, performing full sync");
+      return await syncNotionPages();
+    }
+
+    logger.info("Last sync time", { lastSyncTime: lastSyncTime.toISOString() });
+
+    // Create sync job
+    const { data: job } = await supabase
+      .from("sync_jobs")
+      .insert({
+        job_type: "scheduled" as SyncJobType,
+        status: "running",
+      })
+      .select()
+      .single();
+
+    const jobId = job?.id;
+
+    // List all pages from Notion
+    const allPages = await listAllPages();
+    
+    // Filter pages changed since last sync
+    const changedPages = allPages.filter((page) => {
+      const lastEditedTime = new Date(page.last_edited_time || 0);
+      return lastEditedTime > lastSyncTime;
+    });
+
+    result.pagesProcessed = changedPages.length;
+
+    logger.info("Found pages changed since last sync", { 
+      total: allPages.length,
+      changed: changedPages.length,
+      lastSyncTime: lastSyncTime.toISOString(),
+    });
+
+    for (const page of changedPages) {
+      try {
+        await syncPage(page.id, result);
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        logger.error("Error syncing page", {
+          pageId: page.id,
+          error: errorMsg,
+        });
+        result.errors.push(`Page ${page.id}: ${errorMsg}`);
+      }
+    }
+
+    // Update sync job as completed
+    if (jobId) {
+      await supabase
+        .from("sync_jobs")
+        .update({
+          status: "completed",
+          completed_at: new Date().toISOString(),
+          pages_processed: result.pagesProcessed,
+          blocks_processed: result.blocksProcessed,
+          embeddings_created: result.embeddingsCreated,
+        })
+        .eq("id", jobId);
+    }
+
+    logger.info("Incremental sync completed", result);
+
+    return result;
+  } catch (error) {
+    logger.error("Error in incremental sync", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    
+    // Update sync job as failed
+    if (jobId) {
+      await supabase
+        .from("sync_jobs")
+        .update({
+          status: "failed",
+          completed_at: new Date().toISOString(),
+          error_message: error instanceof Error ? error.message : String(error),
+        })
+        .eq("id", jobId);
+    }
+    
     throw error;
   }
 }
@@ -95,6 +233,9 @@ async function syncPage(pageId: string, result: SyncResult) {
   const url =
     (page as any).url || `https://notion.so/${pageId.replace(/-/g, "")}`;
 
+  // Preserve existing properties if page already exists
+  const preservedProperties = await preserveProperties(pageId, page.properties);
+
   // Save or update page
   await supabase.from("notion_pages").upsert({
     page_id: pageId,
@@ -103,7 +244,7 @@ async function syncPage(pageId: string, result: SyncResult) {
     last_edited_time: page.last_edited_time,
     last_edited_by:
       page.last_edited_by?.id || page.last_edited_by?.name || null,
-    properties: page.properties,
+    properties: preservedProperties,
     parent_page_id: (page.parent as any)?.page_id || null,
     workspace_id: (page as any).workspace_id || null,
     synced_at: new Date().toISOString(),

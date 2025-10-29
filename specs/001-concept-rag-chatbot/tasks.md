@@ -163,15 +163,15 @@ Next.js App Router structure:
 
 ### Implementation for User Story 3 - Milestone 6: Scheduled Sync
 
-- [ ] T062 [US3] Create sync job model and storage in lib/types/sync.ts
-- [ ] T063 [US3] Implement incremental sync service detecting changed pages since last_sync_time in lib/sync/notion-sync.ts
-- [ ] T064 [US3] Add property preservation (tags/status/editor/lastEditedTime) during sync in lib/sync/property-preserver.ts
-- [ ] T065 [US3] Implement /api/sync/trigger endpoint for manual sync in app/api/sync/trigger/route.ts
-- [ ] T066 [US3] Implement /api/sync/status endpoint returning latest sync job status in app/api/sync/status/route.ts
-- [ ] T067 [US3] Create scheduler configuration for 10-minute incremental sync jobs in lib/sync/scheduler.ts
-- [ ] T068 [US3] Add manual reindex button in UI triggering full sync in app/components/sync/SyncTrigger.tsx
-- [ ] T069 [US3] Display sync status timestamp and success/failure in app/components/sync/SyncStatus.tsx
-- [ ] T070 [US3] Implement sync job logging with pages/blocks/embeddings processed count in lib/sync/sync-logger.ts
+- [x] T062 [US3] Create sync job model and storage in lib/types/sync.ts
+- [x] T063 [US3] Implement incremental sync service detecting changed pages since last_sync_time in lib/sync/notion-sync.ts
+- [x] T064 [US3] Add property preservation (tags/status/editor/lastEditedTime) during sync in lib/sync/property-preserver.ts
+- [x] T065 [US3] Implement /api/sync/trigger endpoint for manual sync in app/api/sync/trigger/route.ts
+- [x] T066 [US3] Implement /api/sync/status endpoint returning latest sync job status in app/api/sync/status/route.ts
+- [x] T067 [US3] Create scheduler configuration for 10-minute incremental sync jobs in lib/sync/scheduler.ts
+- [x] T068 [US3] Add manual reindex button in UI triggering full sync in app/components/sync/SyncTrigger.tsx
+- [x] T069 [US3] Display sync status timestamp and success/failure in app/components/sync/SyncStatus.tsx
+- [x] T070 [US3] Implement sync job logging with pages/blocks/embeddings processed count in lib/sync/sync-logger.ts
 
 **Checkpoint**: User Story 3 should work independently with incremental sync functional
 

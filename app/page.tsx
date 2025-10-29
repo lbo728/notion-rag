@@ -3,6 +3,8 @@
 import { ChatMessage, Citation } from "@/app/types/chat";
 import { useChat } from "@/app/hooks/use-chat";
 import { useState } from "react";
+import { SyncTrigger } from "@/app/components/sync/SyncTrigger";
+import { SyncStatus } from "@/app/components/sync/SyncStatus";
 
 export default function Home() {
   const [query, setQuery] = useState("");
@@ -43,19 +45,24 @@ export default function Home() {
                 Personal knowledge archive with Notion integration
               </p>
             </div>
-            {sessionId && (
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">
-                  Session: {sessionId.slice(0, 8)}...
-                </span>
-                <button
-                  onClick={clearMessages}
-                  className="rounded px-3 py-1 text-xs text-gray-600 hover:bg-gray-100"
-                >
-                  New Chat
-                </button>
+            <div className="flex items-center gap-4">
+              {sessionId && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500">
+                    Session: {sessionId.slice(0, 8)}...
+                  </span>
+                  <button
+                    onClick={clearMessages}
+                    className="rounded px-3 py-1 text-xs text-gray-600 hover:bg-gray-100"
+                  >
+                    New Chat
+                  </button>
+                </div>
+              )}
+              <div className="border-l pl-4">
+                <SyncTrigger />
               </div>
-            )}
+            </div>
           </div>
         </div>
       </header>
@@ -125,7 +132,9 @@ export default function Home() {
       {/* Input Form */}
       <footer className="border-t bg-white/50 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
-          <form onSubmit={handleSubmit} className="mx-auto max-w-3xl">
+          <div className="mx-auto max-w-3xl space-y-2">
+            <SyncStatus />
+            <form onSubmit={handleSubmit} className="flex gap-2">
             <div className="flex gap-2">
               <input
                 type="text"
@@ -144,6 +153,7 @@ export default function Home() {
               </button>
             </div>
           </form>
+          </div>
         </div>
       </footer>
     </main>

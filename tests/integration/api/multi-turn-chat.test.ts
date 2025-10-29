@@ -106,7 +106,8 @@ describe("POST /api/chat - Multi-turn Conversation", () => {
         }),
         expect.objectContaining({
           role: "assistant",
-          content: "React is a JavaScript library for building user interfaces.",
+          content:
+            "React is a JavaScript library for building user interfaces.",
         }),
       ])
     );
@@ -290,4 +291,3 @@ describe("POST /api/chat - Multi-turn Conversation", () => {
     );
   });
 });
-

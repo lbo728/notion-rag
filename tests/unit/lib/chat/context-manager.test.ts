@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { getSessionMessages, buildContextText } from "@/lib/chat/context-manager";
+import {
+  getSessionMessages,
+  buildContextText,
+} from "@/lib/chat/context-manager";
 import { SessionMessage } from "@/lib/types/chat";
 import { supabase } from "@/lib/supabase/client";
 
@@ -17,18 +20,23 @@ describe("Context Manager", () => {
 
   describe("getSessionMessages", () => {
     it("should fetch last 10 messages by default", async () => {
-      const mockMessages: SessionMessage[] = Array.from({ length: 10 }, (_, i) => ({
-        id: `msg-${i}`,
-        session_id: "session-1",
-        role: i % 2 === 0 ? "user" : "assistant",
-        content: `Message ${i}`,
-        created_at: new Date().toISOString(),
-      }));
+      const mockMessages: SessionMessage[] = Array.from(
+        { length: 10 },
+        (_, i) => ({
+          id: `msg-${i}`,
+          session_id: "session-1",
+          role: i % 2 === 0 ? "user" : "assistant",
+          content: `Message ${i}`,
+          created_at: new Date().toISOString(),
+        })
+      );
 
       const mockSelect = vi.fn().mockReturnThis();
       const mockEq = vi.fn().mockReturnThis();
       const mockOrder = vi.fn().mockReturnThis();
-      const mockLimit = vi.fn().mockResolvedValue({ data: mockMessages, error: null });
+      const mockLimit = vi
+        .fn()
+        .mockResolvedValue({ data: mockMessages, error: null });
 
       vi.mocked(supabase.from).mockReturnValue({
         select: mockSelect,
@@ -52,18 +60,23 @@ describe("Context Manager", () => {
     });
 
     it("should fetch specified number of messages when limit is provided", async () => {
-      const mockMessages: SessionMessage[] = Array.from({ length: 5 }, (_, i) => ({
-        id: `msg-${i}`,
-        session_id: "session-1",
-        role: "user",
-        content: `Message ${i}`,
-        created_at: new Date().toISOString(),
-      }));
+      const mockMessages: SessionMessage[] = Array.from(
+        { length: 5 },
+        (_, i) => ({
+          id: `msg-${i}`,
+          session_id: "session-1",
+          role: "user",
+          content: `Message ${i}`,
+          created_at: new Date().toISOString(),
+        })
+      );
 
       const mockSelect = vi.fn().mockReturnThis();
       const mockEq = vi.fn().mockReturnThis();
       const mockOrder = vi.fn().mockReturnThis();
-      const mockLimit = vi.fn().mockResolvedValue({ data: mockMessages, error: null });
+      const mockLimit = vi
+        .fn()
+        .mockResolvedValue({ data: mockMessages, error: null });
 
       vi.mocked(supabase.from).mockReturnValue({
         select: mockSelect,
@@ -252,8 +265,9 @@ describe("Context Manager", () => {
 
       const context = buildContextText(messages);
 
-      expect(context).toContain("Complex message with\nnewlines and\nmultiple lines");
+      expect(context).toContain(
+        "Complex message with\nnewlines and\nmultiple lines"
+      );
     });
   });
 });
-
