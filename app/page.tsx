@@ -134,8 +134,8 @@ export default function Home() {
         <div className="container mx-auto px-4 py-4">
           <div className="mx-auto max-w-3xl space-y-2">
             <SyncStatus />
-            <form onSubmit={handleSubmit} className="flex gap-2">
-            <div className="flex gap-2">
+            <form onSubmit={handleSubmit}>
+              <div className="flex gap-2">
               <input
                 type="text"
                 value={query}
