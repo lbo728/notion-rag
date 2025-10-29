@@ -94,11 +94,11 @@ Next.js App Router structure:
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T031 [P] [US1] Unit test for chunker header-aware grouping in tests/unit/lib/notion/chunker.test.ts
-- [ ] T032 [P] [US1] Unit test for MMR retriever (k=8, fetchK=32) in tests/unit/lib/retrieval/mmr-retriever.test.ts
-- [ ] T033 [P] [US1] Unit test for answer composer (summary + citation format) in tests/unit/lib/chat/answer-composer.test.ts
-- [ ] T034 [P] [US1] Integration test for /api/chat endpoint with citation generation in tests/integration/api/chat.test.ts
-- [ ] T035 [US1] E2E test for single-turn chat with citations in tests/e2e/chat.spec.ts
+- [x] T031 [P] [US1] Unit test for chunker header-aware grouping in tests/unit/lib/notion/chunker.test.ts
+- [x] T032 [P] [US1] Unit test for MMR retriever (k=8, fetchK=32) in tests/unit/lib/retrieval/mmr-retriever.test.ts
+- [x] T033 [P] [US1] Unit test for answer composer (summary + citation format) in tests/unit/lib/chat/answer-composer.test.ts
+- [x] T034 [P] [US1] Integration test for /api/chat endpoint with citation generation in tests/integration/api/chat.test.ts
+- [x] T035 [US1] E2E test for single-turn chat with citations in tests/e2e/chat.spec.ts
 
 ### Implementation for User Story 1 - Milestone 3: Search/Generation API
 

@@ -38,7 +38,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Query is required" }, { status: 400 });
     }
 
-    logger.info("Chat request received", { query_length: query.length, streaming: !!useStream });
+    logger.info("Chat request received", {
+      query_length: query.length,
+      streaming: !!useStream,
+    });
 
     // Retrieve relevant documents using MMR (k=8, fetchK=32)
     const retrievedDocs = await mmrRetrieve(query, 8, 32);
@@ -47,7 +50,10 @@ export async function POST(request: NextRequest) {
 
     // Handle streaming response
     if (useStream) {
-      const { stream, citations } = await composeAnswerStream(query, retrievedDocs);
+      const { stream, citations } = await composeAnswerStream(
+        query,
+        retrievedDocs
+      );
 
       return new Response(stream, {
         headers: {

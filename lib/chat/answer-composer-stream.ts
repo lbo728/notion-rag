@@ -31,21 +31,26 @@ export async function composeAnswerStream(
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       start(controller) {
-        const message = "I couldn't find relevant information in your Notion workspace. Please try rephrasing your question or enriching your knowledge base.";
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: message, done: true })}\n\n`));
+        const message =
+          "I couldn't find relevant information in your Notion workspace. Please try rephrasing your question or enriching your knowledge base.";
+        controller.enqueue(
+          encoder.encode(
+            `data: ${JSON.stringify({ content: message, done: true })}\n\n`
+          )
+        );
         controller.close();
       },
     });
-    
+
     return {
       stream,
       citations: [],
     };
   }
-  
+
   // Ensure minimum 2 citations
   const docsToUse = retrievedDocs.length >= 2 ? retrievedDocs : retrievedDocs;
-  
+
   // Format context from retrieved documents
   const context = docsToUse
     .map(
@@ -53,7 +58,7 @@ export async function composeAnswerStream(
         `[Source ${idx + 1}]\n${doc.content}\n---\nPage ID: ${doc.page_id}\nBlock ID: ${doc.block_id}`
     )
     .join("\n\n");
-  
+
   // Compose prompt
   const prompt = `You are a helpful assistant that answers questions based on a personal knowledge archive from Notion.
 
@@ -74,14 +79,15 @@ ANSWER:`;
     query_length: query.length,
     sources_count: docsToUse.length,
   });
-  
+
   // Create OpenAI streaming response
   const completion = await openaiClient.chat.completions.create({
     model: MODEL,
     messages: [
       {
         role: "system",
-        content: "You are a helpful assistant that answers questions based on a personal knowledge archive. Always cite sources with clear references.",
+        content:
+          "You are a helpful assistant that answers questions based on a personal knowledge archive. Always cite sources with clear references.",
       },
       {
         role: "user",
@@ -92,7 +98,7 @@ ANSWER:`;
     temperature: 0.7,
     stream: true,
   });
-  
+
   // Extract citations (minimum 2 as per Constitution)
   const citations = docsToUse.map((doc) => ({
     title: doc.metadata.title || doc.page_id,
@@ -100,7 +106,7 @@ ANSWER:`;
     snippet: doc.content.substring(0, 200),
     relevance_score: doc.mmr_score,
   }));
-  
+
   // Convert OpenAI stream to ReadableStream
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
@@ -110,14 +116,18 @@ ANSWER:`;
           const content = chunk.choices[0]?.delta?.content || "";
           if (content) {
             controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify({ content, done: false })}\n\n`)
+              encoder.encode(
+                `data: ${JSON.stringify({ content, done: false })}\n\n`
+              )
             );
           }
         }
-        
+
         // Send citations at the end
         controller.enqueue(
-          encoder.encode(`data: ${JSON.stringify({ citations, done: true })}\n\n`)
+          encoder.encode(
+            `data: ${JSON.stringify({ citations, done: true })}\n\n`
+          )
         );
         controller.close();
       } catch (error) {
@@ -128,10 +138,9 @@ ANSWER:`;
       }
     },
   });
-  
+
   return {
     stream,
     citations,
   };
 }
-

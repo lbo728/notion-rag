@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+
+# Testing
+coverage/
+*.lcov
+.nyc_output
+
+# Generated files
+*.min.js
+*.min.css
+
+# Environment files
+.env*
+!.env.example
+
+# Logs
+*.log
+*.log.*
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
