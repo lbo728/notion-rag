@@ -75,8 +75,8 @@ Next.js App Router structure:
 
 ### Authentication & API Infrastructure
 
-- [x] T027 Setup NextAuth with Google provider in lib/auth/nextauth.ts
-- [x] T028 Configure auth middleware and session management in middleware.ts
+- [x] T027 Setup simple authentication for single-user mode (no OAuth required)
+- [x] T028 Configure CORS middleware and session management in middleware.ts
 - [x] T029 Create base API route handler utilities in lib/api/base-handler.ts
 - [x] T030 Setup error handling and logging infrastructure in lib/utils/errors.ts and lib/utils/logger.ts
 

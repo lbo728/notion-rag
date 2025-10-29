@@ -37,16 +37,19 @@ NEXTAUTH_URL=http://localhost:3000
 ## 키 발급 방법
 
 ### 1. Supabase (2분)
+
 1. https://supabase.com → 새 프로젝트 생성
 2. Settings → API → Keys 복사
 3. URL, anon key, service_role key 복사
 
 ### 2. Notion API (3분)
+
 1. https://www.notion.so/my-integrations
 2. New integration 생성
-3. Integration token 복사 (secret_로 시작)
+3. Integration token 복사 (secret\_로 시작)
 
 ### 3. OpenAI API (1분)
+
 1. https://platform.openai.com/api-keys
 2. 새 키 생성
 3. 키 복사 (sk-로 시작)
@@ -58,6 +61,7 @@ NEXTAUTH_URL=http://localhost:3000
 단일 사용자 개발 모드에서는 인증 없이 진행 가능합니다.
 
 변경된 설정:
+
 - ✅ NextAuth 제거
 - ✅ 간단한 인증 체크만
 - ✅ 개발 모드: 인증 자동 통과
@@ -90,4 +94,3 @@ pnpm dev
 - [ ] http://localhost:3000 접속 가능
 
 **완료되면**: `/speckit.implement` 명령어로 계속 진행!
-
