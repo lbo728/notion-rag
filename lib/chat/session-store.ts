@@ -3,9 +3,16 @@ import { ChatSessionRecord, SessionMessage } from "@/lib/types/chat";
 
 export async function getOrCreateSession(sessionId?: string): Promise<string> {
   if (sessionId) return sessionId;
+  
+  // For single-user mode, use a default user_id
+  // In a multi-user setup, this would come from authentication
+  const defaultUserId = "single-user";
+  
   const { data, error } = await supabase
     .from("chat_sessions")
-    .insert({})
+    .insert({
+      user_id: defaultUserId,
+    })
     .select("id")
     .single();
   if (error) throw error;
