@@ -1,14 +1,12 @@
 import { Client } from "@notionhq/client";
 
-const notionToken = process.env.NOTION_API_KEY;
-
-if (!notionToken) {
-  throw new Error("NOTION_API_KEY is not set in environment variables");
-}
-
-export const notionClient = new Client({
-  auth: notionToken,
-});
+export const getNotionClient = (): Client => {
+  const notionToken = process.env.NOTION_API_KEY;
+  if (!notionToken) {
+    throw new Error("NOTION_API_KEY is not set in environment variables");
+  }
+  return new Client({ auth: notionToken });
+};
 
 export interface NotionBlock {
   id: string;
@@ -31,7 +29,7 @@ export interface NotionPageProperties {
  */
 export async function fetchPage(pageId: string) {
   try {
-    const response = await notionClient.pages.retrieve({ page_id: pageId });
+    const response = await getNotionClient().pages.retrieve({ page_id: pageId });
     return response;
   } catch (error) {
     console.error(`Error fetching page ${pageId}:`, error);
@@ -48,7 +46,7 @@ export async function fetchPageBlocks(pageId: string) {
     let cursor: string | undefined;
 
     do {
-      const response = await notionClient.blocks.children.list({
+      const response = await getNotionClient().blocks.children.list({
         block_id: pageId,
         page_size: 100,
         start_cursor: cursor,
@@ -76,7 +74,7 @@ export async function listAllPages(databaseId?: string) {
     if (databaseId) {
       // Query a specific database
       do {
-        const response = await notionClient.databases.query({
+        const response = await getNotionClient().databases.query({
           database_id: databaseId,
           page_size: 100,
           start_cursor: cursor,
@@ -87,7 +85,7 @@ export async function listAllPages(databaseId?: string) {
       } while (cursor);
     } else {
       // List all pages (requires search capability)
-      const response = await notionClient.search({
+      const response = await getNotionClient().search({
         filter: {
           property: "object",
           value: "page",

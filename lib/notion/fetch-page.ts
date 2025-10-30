@@ -1,4 +1,4 @@
-import { notionClient } from "./api-client";
+import { getNotionClient } from "./api-client";
 import { logger } from "@/lib/utils/logger";
 import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 
@@ -21,7 +21,7 @@ export async function fetchPageWithProperties(pageId: string) {
   try {
     logger.info("Fetching Notion page with properties", { pageId });
 
-    const page = (await notionClient.pages.retrieve({
+    const page = (await getNotionClient().pages.retrieve({
       page_id: pageId,
     })) as PageObjectResponse;
 

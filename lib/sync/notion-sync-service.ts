@@ -1,5 +1,5 @@
 import { listAllPages } from "@/lib/notion/list-pages";
-import { notionClient } from "@/lib/notion/api-client";
+import { getNotionClient } from "@/lib/notion/api-client";
 import { getSupabase } from "@/lib/supabase/client";
 import { generateEmbedding } from "@/lib/embeddings/openai";
 import { chunkText } from "@/lib/notion/chunker";
@@ -252,7 +252,7 @@ export async function incrementalSyncNotionPages(): Promise<SyncResult> {
  */
 async function syncPage(pageId: string, result: SyncResult) {
   // Fetch page details
-  const page = (await notionClient.pages.retrieve({ page_id: pageId })) as {
+  const page = (await getNotionClient().pages.retrieve({ page_id: pageId })) as {
     url?: string;
     last_edited_time?: string;
     last_edited_by?: { id?: string; name?: string } | null;
@@ -268,25 +268,27 @@ async function syncPage(pageId: string, result: SyncResult) {
   const preservedProperties = page.properties;
 
   // Save or update page
-  await getSupabase().from("notion_pages").upsert({
-    page_id: pageId,
-    title,
-    url,
-    last_edited_time: page.last_edited_time,
-    last_edited_by:
-      page.last_edited_by?.id || page.last_edited_by?.name || null,
-    properties: preservedProperties,
-    parent_page_id: page.parent?.page_id || null,
-    workspace_id: page.workspace_id || null,
-    synced_at: new Date().toISOString(),
-  });
+  await getSupabase()
+    .from("notion_pages")
+    .upsert({
+      page_id: pageId,
+      title,
+      url,
+      last_edited_time: page.last_edited_time,
+      last_edited_by:
+        page.last_edited_by?.id || page.last_edited_by?.name || null,
+      properties: preservedProperties,
+      parent_page_id: page.parent?.page_id || null,
+      workspace_id: page.workspace_id || null,
+      synced_at: new Date().toISOString(),
+    });
 
   // Fetch all blocks for this page
   const blocks: NotionBlock[] = [];
   let cursor: string | undefined;
 
   do {
-    const response = await notionClient.blocks.children.list({
+    const response = await getNotionClient().blocks.children.list({
       block_id: pageId,
       start_cursor: cursor,
     });

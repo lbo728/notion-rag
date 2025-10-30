@@ -1,4 +1,4 @@
-import { notionClient } from "./api-client";
+import { getNotionClient } from "./api-client";
 import { logger } from "@/lib/utils/logger";
 
 /**
@@ -8,7 +8,7 @@ export async function listAllPages() {
   try {
     logger.info("Fetching all pages from Notion workspace");
     
-    const response = await notionClient.search({
+    const response = await getNotionClient().search({
       filter: {
         property: "object",
         value: "page",
@@ -36,7 +36,7 @@ export async function queryDatabase(databaseId: string) {
   try {
     logger.info("Querying Notion database", { databaseId });
     
-    const response = await notionClient.databases.query({
+    const response = await getNotionClient().databases.query({
       database_id: databaseId,
       page_size: 100,
     });
@@ -62,7 +62,7 @@ export async function listDatabases() {
   try {
     logger.info("Fetching databases from Notion workspace");
     
-    const response = await notionClient.search({
+    const response = await getNotionClient().search({
       filter: {
         property: "object",
         value: "database",

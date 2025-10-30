@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/utils/logger";
 import { getSupabase } from "@/lib/supabase/client";
-import {
-  notionClient,
-  NotionBlock as ApiClientNotionBlock,
-} from "@/lib/notion/api-client";
+import { getNotionClient, NotionBlock as ApiClientNotionBlock } from "@/lib/notion/api-client";
 import { generateEmbedding } from "@/lib/embeddings/openai";
 import { parseBlocks } from "@/lib/notion/parser";
 import { extractTextFromBlocks } from "@/lib/notion/text-extractor";
@@ -181,29 +178,31 @@ async function syncPageFromWebhook(pageId: string) {
     logger.info("Syncing page from webhook", { pageId });
 
     // Fetch page
-    const page = (await notionClient.pages.retrieve({
+    const page = (await getNotionClient().pages.retrieve({
       page_id: pageId,
     })) as PageObjectResponse;
     const title = extractTitle(page);
     const url = page.url || `https://notion.so/${pageId.replace(/-/g, "")}`;
 
     // Save/update page
-    await getSupabase().from("notion_pages").upsert({
-      page_id: pageId,
-      title,
-      url,
-      last_edited_time: page.last_edited_time,
-      last_edited_by: page.last_edited_by?.id || null,
-      properties: page.properties,
-      synced_at: new Date().toISOString(),
-    });
+    await getSupabase()
+      .from("notion_pages")
+      .upsert({
+        page_id: pageId,
+        title,
+        url,
+        last_edited_time: page.last_edited_time,
+        last_edited_by: page.last_edited_by?.id || null,
+        properties: page.properties,
+        synced_at: new Date().toISOString(),
+      });
 
     // Fetch and process blocks
     const blocks: NotionBlock[] = [];
     let cursor: string | undefined;
 
     do {
-      const response = await notionClient.blocks.children.list({
+      const response = await getNotionClient().blocks.children.list({
         block_id: pageId,
         start_cursor: cursor,
       });
