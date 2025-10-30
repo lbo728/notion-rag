@@ -196,5 +196,3 @@ Preview 배포 완료 후:
 2. ✅ Notion에서 테스트 페이지 생성
 3. ✅ Webhook 동작 확인 (Vercel Logs)
 4. ✅ 챗봇에서 최신 글 검색 테스트
-
-
