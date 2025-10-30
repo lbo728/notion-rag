@@ -110,12 +110,19 @@ ANSWER:`;
     const tokensUsed = response.usage?.total_tokens || 0;
 
     // Extract citations (minimum 2 as per Constitution)
-    const citations = docsToUse.map((doc) => ({
-      title: doc.metadata.title || doc.page_id,
-      url: `https://notion.so/${doc.page_id.replace(/-/g, "")}`,
-      snippet: doc.content.substring(0, 200),
-      relevance_score: doc.mmr_score,
-    }));
+    const citations = docsToUse.map((doc) => {
+      const metaTitleUnknown = (
+        doc as unknown as { metadata?: { title?: unknown } }
+      ).metadata?.title;
+      const safeTitle =
+        typeof metaTitleUnknown === "string" ? metaTitleUnknown : doc.page_id;
+      return {
+        title: safeTitle,
+        url: `https://notion.so/${doc.page_id.replace(/-/g, "")}`,
+        snippet: doc.content.substring(0, 200),
+        relevance_score: doc.mmr_score,
+      };
+    });
 
     logger.info("Answer composed successfully", {
       tokens_used: tokensUsed,
