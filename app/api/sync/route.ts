@@ -8,7 +8,7 @@ import { supabase } from "@/lib/supabase/client";
  *
  * Trigger manual sync of Notion pages
  */
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     logger.info("Sync request received");
 
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
  *
  * Get sync status
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const { data, error } = await supabase
       .from("sync_jobs")

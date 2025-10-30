@@ -8,7 +8,7 @@ import { SyncStatus } from "@/lib/types/sync";
  *
  * Get latest sync job status
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const { data, error } = await supabase
       .from("sync_jobs")

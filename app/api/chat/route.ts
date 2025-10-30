@@ -17,7 +17,7 @@ import { getSessionMessages } from "@/lib/chat/context-manager";
 export async function POST(request: NextRequest) {
   try {
     // Handle both JSON and form-data
-    let body: any;
+    let body: { query?: string; stream?: boolean; session_id?: string };
     const contentType = request.headers.get("content-type") || "";
 
     if (contentType.includes("application/json")) {
@@ -26,14 +26,22 @@ export async function POST(request: NextRequest) {
       // Parse form data
       const formData = await request.formData();
       const queryParam = formData.get("query");
-      const sessionIdParam = formData.get("session_id") as string | null;
-      body = { query: queryParam, session_id: sessionIdParam ?? undefined };
+      const sessionIdParam = formData.get("session_id");
+      body = {
+        query: typeof queryParam === "string" ? queryParam : undefined,
+        session_id:
+          typeof sessionIdParam === "string" ? sessionIdParam : undefined,
+      };
     } else {
       // Try to parse as URL encoded form data
       const formData = await request.formData();
       const queryParam = formData.get("query");
-      const sessionIdParam = formData.get("session_id") as string | null;
-      body = { query: queryParam, session_id: sessionIdParam ?? undefined };
+      const sessionIdParam = formData.get("session_id");
+      body = {
+        query: typeof queryParam === "string" ? queryParam : undefined,
+        session_id:
+          typeof sessionIdParam === "string" ? sessionIdParam : undefined,
+      };
     }
 
     const { query, stream: useStream, session_id } = body;

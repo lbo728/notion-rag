@@ -1,12 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import {
-  ChatMessage,
-  Citation,
-  ChatApiRequest,
-  ChatApiResponse,
-} from "@/app/types/chat";
+import type { ChatMessage, Citation, ChatApiResponse } from "@/app/types/chat";
 
 export interface UseChatOptions {
   onError?: (error: Error) => void;

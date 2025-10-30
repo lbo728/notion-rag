@@ -1,6 +1,6 @@
 "use client";
 
-import { ChatMessage, Citation } from "@/app/types/chat";
+// ChatMessage and Citation types are used implicitly via useChat hook
 import { useChat } from "@/app/hooks/use-chat";
 import { useState } from "react";
 import { SyncTrigger } from "@/app/components/sync/SyncTrigger";
@@ -136,23 +136,23 @@ export default function Home() {
             <SyncStatus />
             <form onSubmit={handleSubmit}>
               <div className="flex gap-2">
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Ask a question about your Notion workspace..."
-                className="flex-1 rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                disabled={loading}
-              />
-              <button
-                type="submit"
-                disabled={loading || !query.trim()}
-                className="rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Send
-              </button>
-            </div>
-          </form>
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Ask a question about your Notion workspace..."
+                  className="flex-1 rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={loading}
+                />
+                <button
+                  type="submit"
+                  disabled={loading || !query.trim()}
+                  className="rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Send
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </footer>
