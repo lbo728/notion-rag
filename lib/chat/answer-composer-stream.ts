@@ -3,9 +3,15 @@ import { MMRResult } from "@/lib/retrieval/mmr-retriever";
 import { logger } from "@/lib/utils/logger";
 import { SessionMessage } from "@/lib/types/chat";
 
-const openaiClient = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const getOpenAIClient = (): OpenAI => {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error(
+      "OPENAI_API_KEY is missing. Set it in the environment to stream answers."
+    );
+  }
+  return new OpenAI({ apiKey });
+};
 
 const MAX_TOKENS = 1000;
 const MODEL = "gpt-4o-mini";
@@ -100,7 +106,7 @@ ANSWER:`;
   });
 
   // Create OpenAI streaming response
-  const completion = await openaiClient.chat.completions.create({
+  const completion = await getOpenAIClient().chat.completions.create({
     model: MODEL,
     messages: [
       {
