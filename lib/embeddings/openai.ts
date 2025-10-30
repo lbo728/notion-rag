@@ -1,9 +1,15 @@
 import OpenAI from "openai";
 import { logger } from "@/lib/utils/logger";
 
-const openaiClient = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const getOpenAIClient = (): OpenAI => {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error(
+      "OPENAI_API_KEY is missing. Set it in the environment to generate embeddings."
+    );
+  }
+  return new OpenAI({ apiKey });
+};
 
 const EMBEDDING_MODEL = "text-embedding-3-small";
 const EMBEDDING_DIMENSIONS = 1536;
@@ -30,7 +36,7 @@ export async function generateEmbeddings(
           size: batch.length,
         });
 
-        const response = await openaiClient.embeddings.create({
+        const response = await getOpenAIClient().embeddings.create({
           model: EMBEDDING_MODEL,
           input: batch,
           dimensions: EMBEDDING_DIMENSIONS,
