@@ -43,7 +43,7 @@ export async function POST(_request: NextRequest) {
  *
  * Get sync status
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const { data, error } = await getSupabase()
       .from("sync_jobs")

@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/utils/logger";
 import { getSupabase } from "@/lib/supabase/client";
-import { getNotionClient, NotionBlock as ApiClientNotionBlock } from "@/lib/notion/api-client";
+import {
+  getNotionClient,
+  NotionBlock as ApiClientNotionBlock,
+} from "@/lib/notion/api-client";
 import { generateEmbedding } from "@/lib/embeddings/openai";
 import { parseBlocks } from "@/lib/notion/parser";
 import { extractTextFromBlocks } from "@/lib/notion/text-extractor";
@@ -89,6 +92,30 @@ export async function POST(request: NextRequest) {
       { error: "Processing failed, but acknowledged" },
       { status: 200 }
     );
+  }
+}
+
+// TEMP: Allow GET during Notion verification to surface the token in logs.
+export async function GET(request: NextRequest) {
+  try {
+    const url = new URL(request.url);
+    const query = Object.fromEntries(url.searchParams.entries());
+    const headers = Object.fromEntries(request.headers.entries());
+    const body = await request.text().catch(() => "");
+
+    logger.info("Notion webhook GET verification hit", {
+      query,
+      headers,
+      body_preview: body?.slice(0, 500) || "",
+    });
+
+    // Reply 200 so Notion doesn't treat this as failure
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    logger.error("Error in Notion webhook GET", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return NextResponse.json({ ok: false }, { status: 200 });
   }
 }
 
