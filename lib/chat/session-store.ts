@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase/client";
+import { getSupabase } from "@/lib/supabase/client";
 import type { SessionMessage } from "@/lib/types/chat";
 
 export async function getOrCreateSession(sessionId?: string): Promise<string> {
@@ -8,7 +8,7 @@ export async function getOrCreateSession(sessionId?: string): Promise<string> {
   // In a multi-user setup, this would come from authentication
   const defaultUserId = "single-user";
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from("chat_sessions")
     .insert({
       user_id: defaultUserId,
@@ -20,7 +20,7 @@ export async function getOrCreateSession(sessionId?: string): Promise<string> {
 }
 
 export async function saveMessage(message: SessionMessage): Promise<void> {
-  const { error } = await supabase.from("chat_messages").insert({
+  const { error } = await getSupabase().from("chat_messages").insert({
     session_id: message.session_id,
     role: message.role,
     content: message.content,
@@ -32,7 +32,7 @@ export async function updateSessionStats(
   sessionId: string,
   _tokensUsed?: number
 ): Promise<void> {
-  const { error } = await supabase
+  const { error } = await getSupabase()
     .from("chat_sessions")
     .update({
       updated_at: new Date().toISOString(),

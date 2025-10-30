@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/utils/logger";
-import { supabase } from "@/lib/supabase/client";
+import { getSupabase } from "@/lib/supabase/client";
 import { SyncStatus } from "@/lib/types/sync";
 
 /**
@@ -8,9 +8,9 @@ import { SyncStatus } from "@/lib/types/sync";
  *
  * Get latest sync job status
  */
-export async function GET() {
+export async function GET(_request: NextRequest) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from("sync_jobs")
       .select("*")
       .order("started_at", { ascending: false })

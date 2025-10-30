@@ -1,14 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/utils/logger";
 import { syncNotionPages } from "@/lib/sync/notion-sync-service";
-import { supabase } from "@/lib/supabase/client";
+import { getSupabase } from "@/lib/supabase/client";
 
 /**
  * POST /api/sync
  *
  * Trigger manual sync of Notion pages
  */
-export async function POST() {
+export async function POST(_request: NextRequest) {
   try {
     logger.info("Sync request received");
 
@@ -43,9 +43,9 @@ export async function POST() {
  *
  * Get sync status
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from("sync_jobs")
       .select("*")
       .order("created_at", { ascending: false })
