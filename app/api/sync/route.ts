@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { logger } from "@/lib/utils/logger";
 import { syncNotionPages } from "@/lib/sync/notion-sync-service";
 import { supabase } from "@/lib/supabase/client";
@@ -8,7 +8,7 @@ import { supabase } from "@/lib/supabase/client";
  *
  * Trigger manual sync of Notion pages
  */
-export async function POST(_request: NextRequest) {
+export async function POST() {
   try {
     logger.info("Sync request received");
 
@@ -43,7 +43,7 @@ export async function POST(_request: NextRequest) {
  *
  * Get sync status
  */
-export async function GET(_request: NextRequest) {
+export async function GET() {
   try {
     const { data, error } = await supabase
       .from("sync_jobs")
