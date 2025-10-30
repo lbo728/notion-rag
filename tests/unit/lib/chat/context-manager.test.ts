@@ -4,18 +4,21 @@ import {
   buildContextText,
 } from "@/lib/chat/context-manager";
 import { SessionMessage } from "@/lib/types/chat";
-import { supabase } from "@/lib/supabase/client";
+import { getSupabase } from "@/lib/supabase/client";
 
 // Mock Supabase client
 vi.mock("@/lib/supabase/client", () => ({
-  supabase: {
-    from: vi.fn(),
-  },
+  getSupabase: vi.fn(),
 }));
 
 describe("Context Manager", () => {
+  const mockSupabase = {
+    from: vi.fn(),
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getSupabase).mockReturnValue(mockSupabase as never);
   });
 
   describe("getSessionMessages", () => {
@@ -38,7 +41,7 @@ describe("Context Manager", () => {
         .fn()
         .mockResolvedValue({ data: mockMessages, error: null });
 
-      vi.mocked(supabase.from).mockReturnValue({
+      vi.mocked(mockSupabase.from).mockReturnValue({
         select: mockSelect,
       } as any);
 
@@ -54,7 +57,7 @@ describe("Context Manager", () => {
 
       const result = await getSessionMessages("session-1");
 
-      expect(supabase.from).toHaveBeenCalledWith("chat_messages");
+      expect(mockSupabase.from).toHaveBeenCalledWith("chat_messages");
       expect(result).toHaveLength(10);
       expect(result[0].content).toBe("Message 0");
     });
@@ -78,7 +81,7 @@ describe("Context Manager", () => {
         .fn()
         .mockResolvedValue({ data: mockMessages, error: null });
 
-      vi.mocked(supabase.from).mockReturnValue({
+      vi.mocked(mockSupabase.from).mockReturnValue({
         select: mockSelect,
       } as any);
 
@@ -104,7 +107,7 @@ describe("Context Manager", () => {
       const mockOrder = vi.fn().mockReturnThis();
       const mockLimit = vi.fn().mockResolvedValue({ data: [], error: null });
 
-      vi.mocked(supabase.from).mockReturnValue({
+      vi.mocked(mockSupabase.from).mockReturnValue({
         select: mockSelect,
       } as any);
 
@@ -132,7 +135,7 @@ describe("Context Manager", () => {
         error: { message: "Database error" },
       });
 
-      vi.mocked(supabase.from).mockReturnValue({
+      vi.mocked(mockSupabase.from).mockReturnValue({
         select: mockSelect,
       } as any);
 
@@ -160,7 +163,7 @@ describe("Context Manager", () => {
         error: null,
       });
 
-      vi.mocked(supabase.from).mockReturnValue({
+      vi.mocked(mockSupabase.from).mockReturnValue({
         select: mockSelect,
       } as any);
 
