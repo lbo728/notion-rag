@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase/client";
+import { getSupabase } from "@/lib/supabase/client";
 import { logger } from "@/lib/utils/logger";
 
 /**
@@ -10,7 +10,7 @@ export async function preserveProperties(
 ): Promise<Record<string, unknown>> {
   try {
     // Get existing page from database
-    const { data: existingPage, error } = await supabase
+    const { data: existingPage, error } = await getSupabase()
       .from("notion_pages")
       .select("properties")
       .eq("page_id", pageId)
