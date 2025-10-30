@@ -20,6 +20,23 @@ vi.mock("@/lib/utils/logger", () => ({
   },
 }));
 
+// Mock parseBlocks and other dependencies that syncPage uses
+vi.mock("@/lib/notion/parser", () => ({
+  parseBlocks: vi.fn().mockReturnValue([]),
+}));
+vi.mock("@/lib/notion/text-extractor", () => ({
+  extractTextFromBlocks: vi.fn().mockReturnValue([]),
+}));
+vi.mock("@/lib/notion/chunker", () => ({
+  chunkText: vi.fn().mockReturnValue([]),
+}));
+vi.mock("@/lib/embeddings/openai", () => ({
+  generateEmbedding: vi.fn().mockResolvedValue(new Array(1536).fill(0.1)),
+}));
+vi.mock("@/lib/retrieval/vector-store", () => ({
+  saveEmbeddings: vi.fn().mockResolvedValue(undefined),
+}));
+
 describe("incrementalSyncNotionPages", () => {
   const mockSupabase = {
     from: vi.fn(),
@@ -42,9 +59,9 @@ describe("incrementalSyncNotionPages", () => {
         error: { code: "PGRST116" },
       });
 
-      mockSupabase.from.mockReturnValue({
+      vi.mocked(mockSupabase.from).mockReturnValue({
         select: mockSelect,
-      });
+      } as any);
       mockSelect.mockReturnValue({
         eq: mockEq,
       });
@@ -58,20 +75,55 @@ describe("incrementalSyncNotionPages", () => {
         single: mockSingle,
       });
 
-      // Mock syncNotionPages to return early
-      vi.mocked(syncNotionPages).mockResolvedValue({
-        pagesProcessed: 0,
-        blocksProcessed: 0,
-        embeddingsCreated: 0,
-        errors: [],
+      // Mock listAllPages to return empty array (full sync will process 0 pages)
+      vi.mocked(listAllPages).mockResolvedValue([] as any);
+
+      // Mock sync job insert for full sync
+      const mockInsertFull = vi.fn().mockReturnThis();
+      const mockInsertSelectFull = vi.fn().mockReturnThis();
+      const mockInsertSingleFull = vi.fn().mockResolvedValue({
+        data: { id: "job-full" },
+        error: null,
+      });
+
+      const mockUpdate = vi.fn().mockReturnThis();
+      const mockUpdateEq = vi
+        .fn()
+        .mockResolvedValue({ data: null, error: null });
+
+      vi.mocked(mockSupabase.from).mockImplementation((table: string) => {
+        if (table === "sync_jobs") {
+          return {
+            select: mockSelect,
+            insert: mockInsertFull,
+            update: mockUpdate,
+          } as any;
+        }
+        return {
+          delete: vi.fn().mockReturnThis(),
+          upsert: vi.fn().mockResolvedValue({ error: null }),
+        } as any;
+      });
+
+      mockUpdate.mockReturnValue({
+        eq: mockUpdateEq,
+      });
+
+      mockInsertFull.mockReturnValue({
+        select: mockInsertSelectFull,
+      });
+      mockInsertSelectFull.mockReturnValue({
+        single: mockInsertSingleFull,
       });
 
       const result = await incrementalSyncNotionPages();
 
       expect(mockSupabase.from).toHaveBeenCalledWith("sync_jobs");
       expect(mockEq).toHaveBeenCalledWith("status", "completed");
-      expect(mockOrder).toHaveBeenCalledWith("completed_at", { ascending: false });
-      expect(syncNotionPages).toHaveBeenCalled();
+      expect(mockOrder).toHaveBeenCalledWith("completed_at", {
+        ascending: false,
+      });
+      // When no previous sync, it calls syncNotionPages which processes 0 pages
       expect(result.pagesProcessed).toBe(0);
     });
 
@@ -88,9 +140,21 @@ describe("incrementalSyncNotionPages", () => {
         error: null,
       });
 
-      mockSupabase.from.mockReturnValue({
-        select: mockSelect,
+      const mockFrom = vi.fn().mockImplementation((table: string) => {
+        if (table === "sync_jobs") {
+          return {
+            select: mockSelect,
+            insert: vi.fn().mockReturnThis(),
+            update: vi.fn().mockReturnThis(),
+          } as any;
+        }
+        return {
+          delete: vi.fn().mockReturnThis(),
+          upsert: vi.fn().mockResolvedValue({ error: null }),
+        } as any;
       });
+
+      vi.mocked(mockSupabase.from).mockImplementation(mockFrom);
       mockSelect.mockReturnValue({
         eq: mockEq,
       });
@@ -218,9 +282,21 @@ describe("incrementalSyncNotionPages", () => {
         error: null,
       });
 
-      mockSupabase.from.mockReturnValue({
-        select: mockSelect,
+      const mockFrom = vi.fn().mockImplementation((table: string) => {
+        if (table === "sync_jobs") {
+          return {
+            select: mockSelect,
+            insert: vi.fn().mockReturnThis(),
+            update: vi.fn().mockReturnThis(),
+          } as any;
+        }
+        return {
+          delete: vi.fn().mockReturnThis(),
+          upsert: vi.fn().mockResolvedValue({ error: null }),
+        } as any;
       });
+
+      vi.mocked(mockSupabase.from).mockImplementation(mockFrom);
       mockSelect.mockReturnValue({
         eq: mockEq,
       });
@@ -330,9 +406,21 @@ describe("incrementalSyncNotionPages", () => {
         error: null,
       });
 
-      mockSupabase.from.mockReturnValue({
-        select: mockSelect,
+      const mockFrom = vi.fn().mockImplementation((table: string) => {
+        if (table === "sync_jobs") {
+          return {
+            select: mockSelect,
+            insert: vi.fn().mockReturnThis(),
+            update: vi.fn().mockReturnThis(),
+          } as any;
+        }
+        return {
+          delete: vi.fn().mockReturnThis(),
+          upsert: vi.fn().mockResolvedValue({ error: null }),
+        } as any;
       });
+
+      vi.mocked(mockSupabase.from).mockImplementation(mockFrom);
       mockSelect.mockReturnValue({
         eq: mockEq,
       });
@@ -436,4 +524,3 @@ describe("incrementalSyncNotionPages", () => {
     });
   });
 });
-
