@@ -106,3 +106,5 @@ function getPageTitle(page: any): string {
 
 const searchTerm = process.argv[2];
 findNotionPage(searchTerm).catch(console.error);
+
+
