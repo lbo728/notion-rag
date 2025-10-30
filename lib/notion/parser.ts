@@ -21,7 +21,9 @@ export function parseBlock(block: NotionBlock): ParsedBlock | null {
     return null;
   }
 
-  const content = block[type];
+  const content = block[type] as
+    | { rich_text?: Array<{ plain_text?: string }>; language?: string }
+    | undefined;
   let text = "";
 
   // Extract text based on block type
@@ -31,22 +33,22 @@ export function parseBlock(block: NotionBlock): ParsedBlock | null {
     case "heading_2":
     case "heading_3":
     case "quote":
-      text = extractRichText(content.rich_text);
+      text = extractRichText(content?.rich_text);
       break;
 
     case "bulleted_list_item":
     case "numbered_list_item":
     case "to_do":
-      text = extractRichText(content.rich_text);
+      text = extractRichText(content?.rich_text);
       break;
 
     case "code":
-      text = extractRichText(content.rich_text);
-      text = `\`\`\`${content.language || ""}\n${text}\n\`\`\``;
+      text = extractRichText(content?.rich_text);
+      text = `\`\`\`${content?.language || ""}\n${text}\n\`\`\``;
       break;
 
     case "callout":
-      text = extractRichText(content.rich_text);
+      text = extractRichText(content?.rich_text);
       break;
 
     default:
@@ -60,7 +62,7 @@ export function parseBlock(block: NotionBlock): ParsedBlock | null {
     metadata: {
       original_type: type,
       has_children,
-      ...content,
+      ...(content ?? {}),
     },
   };
 }
