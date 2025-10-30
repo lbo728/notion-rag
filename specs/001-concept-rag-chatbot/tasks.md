@@ -185,8 +185,8 @@ Next.js App Router structure:
 
 ### Tests for User Story 4 - Milestone 5: Bookmarks
 
-- [ ] T071 [P] [US4] Unit test for collection creation and management in tests/unit/lib/collections/collection-manager.test.ts
-- [ ] T072 [P] [US4] Integration test for collections API CRUD operations in tests/integration/api/collections.test.ts
+- [x] T071 [P] [US4] Unit test for collection creation and management in tests/unit/lib/collections/collection-manager.test.ts
+- [x] T072 [P] [US4] Integration test for collections API CRUD operations in tests/integration/api/collections.test.ts
 
 ### Implementation for User Story 4
 
