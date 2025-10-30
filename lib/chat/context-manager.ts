@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase/client";
+import { getSupabase } from "@/lib/supabase/client";
 import { SessionMessage } from "@/lib/types/chat";
 
 const DEFAULT_CONTEXT_WINDOW = 10;
@@ -7,7 +7,7 @@ export async function getSessionMessages(
   sessionId: string,
   limit: number = DEFAULT_CONTEXT_WINDOW
 ): Promise<SessionMessage[]> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from("chat_messages")
     .select("id, session_id, role, content, created_at")
     .eq("session_id", sessionId)

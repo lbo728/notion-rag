@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/utils/logger";
-import { supabase } from "@/lib/supabase/client";
+import { getSupabase } from "@/lib/supabase/client";
 import {
   notionClient,
   NotionBlock as ApiClientNotionBlock,
@@ -188,7 +188,7 @@ async function syncPageFromWebhook(pageId: string) {
     const url = page.url || `https://notion.so/${pageId.replace(/-/g, "")}`;
 
     // Save/update page
-    await supabase.from("notion_pages").upsert({
+    await getSupabase().from("notion_pages").upsert({
       page_id: pageId,
       title,
       url,
@@ -226,7 +226,7 @@ async function syncPageFromWebhook(pageId: string) {
     const chunks = chunkText(extractedTexts);
 
     // Delete old blocks for this page
-    await supabase.from("notion_blocks").delete().eq("page_id", pageId);
+    await getSupabase().from("notion_blocks").delete().eq("page_id", pageId);
 
     // Generate embeddings and save
     for (const chunk of chunks) {
@@ -272,8 +272,8 @@ async function syncPageFromWebhook(pageId: string) {
  * Delete page from database
  */
 async function deletePageFromDatabase(pageId: string) {
-  await supabase.from("notion_blocks").delete().eq("page_id", pageId);
-  await supabase.from("notion_pages").delete().eq("page_id", pageId);
+  await getSupabase().from("notion_blocks").delete().eq("page_id", pageId);
+  await getSupabase().from("notion_pages").delete().eq("page_id", pageId);
 
   logger.info("Page deleted from database", { pageId });
 }

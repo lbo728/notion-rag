@@ -1,6 +1,6 @@
 import { listAllPages } from "@/lib/notion/list-pages";
 import { notionClient } from "@/lib/notion/api-client";
-import { supabase } from "@/lib/supabase/client";
+import { getSupabase } from "@/lib/supabase/client";
 import { generateEmbedding } from "@/lib/embeddings/openai";
 import { chunkText } from "@/lib/notion/chunker";
 import { parseBlocks } from "@/lib/notion/parser";
@@ -28,7 +28,7 @@ export interface SyncResult {
  * Get the last successful sync time from sync_jobs table
  */
 async function getLastSyncTime(): Promise<Date | null> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from("sync_jobs")
     .select("completed_at")
     .eq("status", "completed")
@@ -60,7 +60,7 @@ export async function syncNotionPages(): Promise<SyncResult> {
     logger.info("Starting Notion sync");
 
     // Create sync job
-    const { data: job } = await supabase
+    const { data: job } = await getSupabase()
       .from("sync_jobs")
       .insert({
         job_type: "manual" as SyncJobType,
@@ -92,7 +92,7 @@ export async function syncNotionPages(): Promise<SyncResult> {
 
     // Update sync job as completed
     if (jobId) {
-      await supabase
+      await getSupabase()
         .from("sync_jobs")
         .update({
           status: "completed",
@@ -119,7 +119,7 @@ export async function syncNotionPages(): Promise<SyncResult> {
 
     // Update sync job as failed
     if (jobId) {
-      await supabase
+      await getSupabase()
         .from("sync_jobs")
         .update({
           status: "failed",
@@ -160,7 +160,7 @@ export async function incrementalSyncNotionPages(): Promise<SyncResult> {
     logger.info("Last sync time", { lastSyncTime: lastSyncTime.toISOString() });
 
     // Create sync job
-    const { data: job } = await supabase
+    const { data: job } = await getSupabase()
       .from("sync_jobs")
       .insert({
         job_type: "scheduled" as SyncJobType,
@@ -206,7 +206,7 @@ export async function incrementalSyncNotionPages(): Promise<SyncResult> {
 
     // Update sync job as completed
     if (jobId) {
-      await supabase
+      await getSupabase()
         .from("sync_jobs")
         .update({
           status: "completed",
@@ -233,7 +233,7 @@ export async function incrementalSyncNotionPages(): Promise<SyncResult> {
 
     // Update sync job as failed
     if (jobId) {
-      await supabase
+      await getSupabase()
         .from("sync_jobs")
         .update({
           status: "failed",
@@ -268,7 +268,7 @@ async function syncPage(pageId: string, result: SyncResult) {
   const preservedProperties = page.properties;
 
   // Save or update page
-  await supabase.from("notion_pages").upsert({
+  await getSupabase().from("notion_pages").upsert({
     page_id: pageId,
     title,
     url,

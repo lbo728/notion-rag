@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase/client";
+import { getSupabase } from "@/lib/supabase/client";
 import { logger } from "@/lib/utils/logger";
 
 export interface VectorSearchResult {
@@ -42,7 +42,7 @@ export async function saveEmbeddings(
       },
     }));
 
-    const { error } = await supabase.from("notion_blocks").upsert(blocks, {
+    const { error } = await getSupabase().from("notion_blocks").upsert(blocks, {
       onConflict: "page_id,block_id",
       ignoreDuplicates: false,
     });
@@ -75,7 +75,7 @@ export async function vectorSearch(
       hasFilter: !!filter,
     });
 
-    const { data, error } = await supabase.rpc("match_blocks", {
+    const { data, error } = await getSupabase().rpc("match_blocks", {
       query_embedding: queryEmbedding,
       match_threshold: 0.3, // Lower threshold for better recall (especially for Korean)
       match_count: fetchK,
@@ -107,7 +107,7 @@ export async function vectorSearch(
     > = {};
 
     if (pageIds.length > 0) {
-      const { data: pagesData } = await supabase
+      const { data: pagesData } = await getSupabase()
         .from("notion_pages")
         .select("page_id, created_time, last_edited_time")
         .in("page_id", pageIds);
