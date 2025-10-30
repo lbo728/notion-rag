@@ -7,6 +7,23 @@ import { composeAnswer } from "@/lib/chat/answer-composer";
 // Mock dependencies
 vi.mock("@/lib/retrieval/mmr-retriever");
 vi.mock("@/lib/chat/answer-composer");
+vi.mock("@/lib/chat/answer-composer-stream", () => ({
+  composeAnswerStream: vi.fn().mockResolvedValue({
+    stream: new ReadableStream({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode("data: test\n\n"));
+        controller.close();
+      },
+    }),
+  }),
+}));
+vi.mock("@/lib/chat/session-store", () => ({
+  getOrCreateSession: vi.fn().mockResolvedValue("test-session-id"),
+  saveMessage: vi.fn().mockResolvedValue(undefined),
+}));
+vi.mock("@/lib/chat/context-manager", () => ({
+  getSessionMessages: vi.fn().mockResolvedValue([]),
+}));
 vi.mock("@/lib/utils/logger", () => ({
   logger: {
     info: vi.fn(),
@@ -81,7 +98,11 @@ describe("POST /api/chat", () => {
     expect(data.metadata).toHaveProperty("sources_count");
 
     expect(mmrRetrieve).toHaveBeenCalledWith("test query", 8, 32);
-    expect(composeAnswer).toHaveBeenCalledWith("test query", mockRetrievedDocs);
+    expect(composeAnswer).toHaveBeenCalledWith(
+      "test query",
+      mockRetrievedDocs,
+      expect.any(Array)
+    );
   });
 
   it("should return 400 when query is missing", async () => {
