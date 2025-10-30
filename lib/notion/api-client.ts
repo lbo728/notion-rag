@@ -14,7 +14,7 @@ export interface NotionBlock {
   id: string;
   type: string;
   has_children: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface NotionPageProperties {
@@ -23,7 +23,7 @@ export interface NotionPageProperties {
   editor?: string;
   category?: string;
   priority?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -46,18 +46,18 @@ export async function fetchPageBlocks(pageId: string) {
   try {
     const blocks: NotionBlock[] = [];
     let cursor: string | undefined;
-    
+
     do {
       const response = await notionClient.blocks.children.list({
         block_id: pageId,
         page_size: 100,
         start_cursor: cursor,
       });
-      
-      blocks.push(...response.results as NotionBlock[]);
+
+      blocks.push(...(response.results as NotionBlock[]));
       cursor = response.next_cursor || undefined;
     } while (cursor);
-    
+
     return blocks;
   } catch (error) {
     console.error(`Error fetching blocks for page ${pageId}:`, error);
@@ -72,7 +72,7 @@ export async function listAllPages(databaseId?: string) {
   try {
     const pages = [];
     let cursor: string | undefined;
-    
+
     if (databaseId) {
       // Query a specific database
       do {
@@ -81,7 +81,7 @@ export async function listAllPages(databaseId?: string) {
           page_size: 100,
           start_cursor: cursor,
         });
-        
+
         pages.push(...response.results);
         cursor = response.next_cursor || undefined;
       } while (cursor);
@@ -95,11 +95,10 @@ export async function listAllPages(databaseId?: string) {
       });
       pages.push(...response.results);
     }
-    
+
     return pages;
   } catch (error) {
     console.error("Error listing pages:", error);
     throw error;
   }
 }
-

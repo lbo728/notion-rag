@@ -9,11 +9,6 @@ const EMBEDDING_MODEL = "text-embedding-3-small";
 const EMBEDDING_DIMENSIONS = 1536;
 const BATCH_SIZE = 512;
 
-interface EmbeddingResult {
-  embedding: number[];
-  error?: string;
-}
-
 /**
  * Generate embeddings with retry/backoff logic
  */
@@ -22,10 +17,10 @@ export async function generateEmbeddings(
   retries: number = 3
 ): Promise<number[][]> {
   const embeddings: number[][] = [];
-  
+
   for (let i = 0; i < texts.length; i += BATCH_SIZE) {
     const batch = texts.slice(i, i + BATCH_SIZE);
-    
+
     let attempt = 0;
     while (attempt < retries) {
       try {
@@ -34,25 +29,25 @@ export async function generateEmbeddings(
           total: Math.ceil(texts.length / BATCH_SIZE),
           size: batch.length,
         });
-        
+
         const response = await openaiClient.embeddings.create({
           model: EMBEDDING_MODEL,
           input: batch,
           dimensions: EMBEDDING_DIMENSIONS,
         });
-        
+
         const batchEmbeddings = response.data.map((item) => item.embedding);
         embeddings.push(...batchEmbeddings);
-        
+
         logger.info("Embeddings generated", {
           batch: i / BATCH_SIZE + 1,
           count: batchEmbeddings.length,
         });
-        
+
         break; // Success, exit retry loop
       } catch (error) {
         attempt++;
-        
+
         if (attempt >= retries) {
           logger.error("Failed to generate embeddings after retries", {
             batch: i / BATCH_SIZE + 1,
@@ -60,23 +55,26 @@ export async function generateEmbeddings(
           });
           throw error;
         }
-        
+
         // Exponential backoff
         const delay = Math.pow(2, attempt) * 1000;
-        logger.warn(`Retrying embeddings generation (attempt ${attempt}/${retries})`, {
-          delay: `${delay}ms`,
-        });
-        
+        logger.warn(
+          `Retrying embeddings generation (attempt ${attempt}/${retries})`,
+          {
+            delay: `${delay}ms`,
+          }
+        );
+
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
-    
+
     // Rate limiting: wait between batches
     if (i + BATCH_SIZE < texts.length) {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
   }
-  
+
   return embeddings;
 }
 
@@ -98,4 +96,3 @@ export function getEmbeddingModelInfo() {
     batch_size: BATCH_SIZE,
   };
 }
-

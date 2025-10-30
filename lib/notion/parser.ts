@@ -7,7 +7,7 @@ export interface ParsedBlock {
   metadata: {
     original_type: string;
     has_children: boolean;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
@@ -16,14 +16,14 @@ export interface ParsedBlock {
  */
 export function parseBlock(block: NotionBlock): ParsedBlock | null {
   const { id, type, has_children } = block;
-  
+
   if (!block[type]) {
     return null;
   }
-  
+
   const content = block[type];
   let text = "";
-  
+
   // Extract text based on block type
   switch (type) {
     case "paragraph":
@@ -33,26 +33,26 @@ export function parseBlock(block: NotionBlock): ParsedBlock | null {
     case "quote":
       text = extractRichText(content.rich_text);
       break;
-    
+
     case "bulleted_list_item":
     case "numbered_list_item":
     case "to_do":
       text = extractRichText(content.rich_text);
       break;
-    
+
     case "code":
       text = extractRichText(content.rich_text);
       text = `\`\`\`${content.language || ""}\n${text}\n\`\`\``;
       break;
-    
+
     case "callout":
       text = extractRichText(content.rich_text);
       break;
-    
+
     default:
       text = "";
   }
-  
+
   return {
     id,
     type,
@@ -68,11 +68,13 @@ export function parseBlock(block: NotionBlock): ParsedBlock | null {
 /**
  * Extract plain text from Notion rich_text array
  */
-function extractRichText(richText: any[]): string {
+function extractRichText(
+  richText: Array<{ plain_text?: string }> | undefined
+): string {
   if (!richText || !Array.isArray(richText)) {
     return "";
   }
-  
+
   return richText.map((item) => item.plain_text || "").join("");
 }
 
@@ -81,14 +83,13 @@ function extractRichText(richText: any[]): string {
  */
 export function parseBlocks(blocks: NotionBlock[]): ParsedBlock[] {
   const parsed: ParsedBlock[] = [];
-  
+
   for (const block of blocks) {
     const parsedBlock = parseBlock(block);
     if (parsedBlock && parsedBlock.text.trim()) {
       parsed.push(parsedBlock);
     }
   }
-  
+
   return parsed;
 }
-

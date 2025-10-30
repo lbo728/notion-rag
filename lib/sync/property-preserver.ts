@@ -6,8 +6,8 @@ import { logger } from "@/lib/utils/logger";
  */
 export async function preserveProperties(
   pageId: string,
-  newProperties: any
-): Promise<any> {
+  newProperties: Record<string, unknown>
+): Promise<Record<string, unknown>> {
   try {
     // Get existing page from database
     const { data: existingPage, error } = await supabase
@@ -21,7 +21,10 @@ export async function preserveProperties(
       return newProperties;
     }
 
-    const existingProperties = existingPage.properties as any;
+    const existingProperties = existingPage.properties as Record<
+      string,
+      unknown
+    >;
 
     // Preserve specific properties that should not be overwritten
     const preserved = {

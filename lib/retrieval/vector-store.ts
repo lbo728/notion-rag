@@ -1,5 +1,4 @@
 import { supabase } from "@/lib/supabase/client";
-import { NotionBlock } from "@/lib/supabase/types";
 import { logger } from "@/lib/utils/logger";
 
 export interface VectorSearchResult {
@@ -8,7 +7,9 @@ export interface VectorSearchResult {
   block_id: string;
   content: string;
   similarity: number;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
+  page_last_edited_time?: string | null;
+  page_created_time?: string | null;
 }
 
 /**
@@ -20,7 +21,7 @@ export async function saveEmbeddings(
     block_ids: string[];
     embedding: number[];
     page_id: string;
-    metadata: any;
+    metadata: Record<string, unknown>;
   }>
 ): Promise<void> {
   try {
@@ -66,7 +67,7 @@ export async function saveEmbeddings(
 export async function vectorSearch(
   queryEmbedding: number[],
   fetchK: number = 32,
-  filter?: Record<string, any>
+  filter?: Record<string, unknown>
 ): Promise<VectorSearchResult[]> {
   try {
     logger.info("Performing vector search", {
@@ -74,21 +75,11 @@ export async function vectorSearch(
       hasFilter: !!filter,
     });
 
-    let query = supabase
-      .rpc("match_blocks", {
-        query_embedding: queryEmbedding,
-        match_threshold: 0.5,
-        match_count: fetchK,
-      })
-      .select("id, page_id, block_id, content, metadata");
-
-    if (filter) {
-      Object.entries(filter).forEach(([key, value]) => {
-        query = query.eq(key, value);
-      });
-    }
-
-    const { data, error } = await query;
+    const { data, error } = await supabase.rpc("match_blocks", {
+      query_embedding: queryEmbedding,
+      match_threshold: 0.3, // Lower threshold for better recall (especially for Korean)
+      match_count: fetchK,
+    });
 
     if (error) {
       logger.error("Vector search failed", {
@@ -106,15 +97,58 @@ export async function vectorSearch(
       result_count: data?.length || 0,
     });
 
+    // Fetch page date information for all unique page_ids
+    const pageIds = [
+      ...new Set((data || []).map((item: { page_id: string }) => item.page_id)),
+    ];
+    const pageDates: Record<
+      string,
+      { created_time?: string | null; last_edited_time?: string | null }
+    > = {};
+
+    if (pageIds.length > 0) {
+      const { data: pagesData } = await supabase
+        .from("notion_pages")
+        .select("page_id, created_time, last_edited_time")
+        .in("page_id", pageIds);
+
+      if (pagesData) {
+        pagesData.forEach(
+          (page: {
+            page_id: string;
+            created_time?: string | null;
+            last_edited_time?: string | null;
+          }) => {
+            pageDates[page.page_id] = {
+              created_time: page.created_time,
+              last_edited_time: page.last_edited_time,
+            };
+          }
+        );
+      }
+    }
+
     return (
-      data?.map((item: any) => ({
-        id: item.id,
-        page_id: item.page_id,
-        block_id: item.block_id,
-        content: item.content,
-        similarity: item.similarity || 0,
-        metadata: item.metadata,
-      })) || []
+      data?.map(
+        (item: {
+          id: string;
+          page_id: string;
+          block_id: string;
+          content: string;
+          similarity?: number;
+          metadata: Record<string, unknown>;
+        }) => ({
+          id: item.id,
+          page_id: item.page_id,
+          block_id: item.block_id,
+          content: item.content,
+          similarity: item.similarity || 0,
+          metadata: item.metadata,
+          page_last_edited_time:
+            pageDates[item.page_id]?.last_edited_time || null,
+          page_created_time: pageDates[item.page_id]?.created_time || null,
+        })
+      ) || []
     );
   } catch (error) {
     logger.error("Error in vector search", {

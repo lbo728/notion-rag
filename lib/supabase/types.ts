@@ -8,7 +8,7 @@ export interface NotionPage {
   page_id: string;
   title: string | null;
   url: string;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   last_edited_time: string | null;
   last_edited_by: string | null;
   created_time: string | null;
@@ -26,7 +26,7 @@ export interface NotionBlock {
   block_type: string | null;
   content: string;
   embedding: number[] | null;
-  metadata: Record<string, any> | null;
+  metadata: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 }
@@ -93,6 +93,6 @@ export interface SyncJob {
   blocks_processed: number;
   embeddings_created: number;
   error_message: string | null;
-  metadata: Record<string, any> | null;
+  metadata: Record<string, unknown> | null;
   created_at: string;
 }

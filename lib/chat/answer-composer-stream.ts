@@ -55,10 +55,14 @@ export async function composeAnswerStream(
 
   // Format context from retrieved documents
   const retrievalContext = docsToUse
-    .map(
-      (doc, idx) =>
-        `[Source ${idx + 1}]\n${doc.content}\n---\nPage ID: ${doc.page_id}\nBlock ID: ${doc.block_id}`
-    )
+    .map((doc, idx) => {
+      const dateInfo = doc.page_last_edited_time
+        ? `\nLast edited: ${new Date(doc.page_last_edited_time).toLocaleDateString("ko-KR")}`
+        : doc.page_created_time
+          ? `\nCreated: ${new Date(doc.page_created_time).toLocaleDateString("ko-KR")}`
+          : "";
+      return `[Source ${idx + 1}]\n${doc.content}\n---\nPage ID: ${doc.page_id}\nBlock ID: ${doc.block_id}${dateInfo}`;
+    })
     .join("\n\n");
 
   // Compose prompt with conversation context
@@ -85,6 +89,7 @@ INSTRUCTIONS:
 3. Keep the answer concise and focused on the question
 4. If information is missing, say so rather than inventing facts
 5. Use the conversation context to maintain continuity if relevant
+6. If the question asks for "most recent" or "latest" content, prioritize sources with the most recent dates
 
 ANSWER:`;
 
