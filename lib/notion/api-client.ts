@@ -29,7 +29,9 @@ export interface NotionPageProperties {
  */
 export async function fetchPage(pageId: string) {
   try {
-    const response = await getNotionClient().pages.retrieve({ page_id: pageId });
+    const response = await getNotionClient().pages.retrieve({
+      page_id: pageId,
+    });
     return response;
   } catch (error) {
     console.error(`Error fetching page ${pageId}:`, error);

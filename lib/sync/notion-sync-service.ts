@@ -252,7 +252,9 @@ export async function incrementalSyncNotionPages(): Promise<SyncResult> {
  */
 async function syncPage(pageId: string, result: SyncResult) {
   // Fetch page details
-  const page = (await getNotionClient().pages.retrieve({ page_id: pageId })) as {
+  const page = (await getNotionClient().pages.retrieve({
+    page_id: pageId,
+  })) as {
     url?: string;
     last_edited_time?: string;
     last_edited_by?: { id?: string; name?: string } | null;

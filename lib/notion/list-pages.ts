@@ -7,7 +7,7 @@ import { logger } from "@/lib/utils/logger";
 export async function listAllPages() {
   try {
     logger.info("Fetching all pages from Notion workspace");
-    
+
     const response = await getNotionClient().search({
       filter: {
         property: "object",
@@ -15,11 +15,11 @@ export async function listAllPages() {
       },
       page_size: 100,
     });
-    
+
     logger.info("Pages fetched successfully", {
       count: response.results.length,
     });
-    
+
     return response.results;
   } catch (error) {
     logger.error("Error listing pages", {
@@ -35,16 +35,16 @@ export async function listAllPages() {
 export async function queryDatabase(databaseId: string) {
   try {
     logger.info("Querying Notion database", { databaseId });
-    
+
     const response = await getNotionClient().databases.query({
       database_id: databaseId,
       page_size: 100,
     });
-    
+
     logger.info("Database queried successfully", {
       count: response.results.length,
     });
-    
+
     return response.results;
   } catch (error) {
     logger.error("Error querying database", {
@@ -61,7 +61,7 @@ export async function queryDatabase(databaseId: string) {
 export async function listDatabases() {
   try {
     logger.info("Fetching databases from Notion workspace");
-    
+
     const response = await getNotionClient().search({
       filter: {
         property: "object",
@@ -69,11 +69,11 @@ export async function listDatabases() {
       },
       page_size: 100,
     });
-    
+
     logger.info("Databases fetched successfully", {
       count: response.results.length,
     });
-    
+
     return response.results;
   } catch (error) {
     logger.error("Error listing databases", {
@@ -82,4 +82,3 @@ export async function listDatabases() {
     throw error;
   }
 }
-
