@@ -71,3 +71,5 @@ pnpm tsx scripts/find-notion-page.ts "짧은"
 3. **API 키 오류**
    - `.env.local`의 `NOTION_API_KEY`가 올바른지 확인
    - Integration의 Internal Integration Token을 사용해야 합니다
+
+

@@ -378,3 +378,5 @@ hotfix/*        → Preview → Production (긴급 수정)
 - `main`에만 merge → Production 배포
 - PR 생성 → 자동 Preview 배포
 - 자동으로 환경 분리 ✅
+
+

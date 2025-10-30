@@ -123,3 +123,5 @@ export async function POST(req: Request) {
 
 - 주기적 동기화: Cron (10분마다)
 - 실시간 동기화: Webhook (즉시)
+
+

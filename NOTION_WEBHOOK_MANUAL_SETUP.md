@@ -188,3 +188,5 @@ Page synced from webhook { pageId: '...', chunks: 5 }
 2. 위 가이드에 따라 Webhook 생성
 3. Secret 환경 변수 설정
 4. 테스트 페이지 생성으로 동작 확인
+
+

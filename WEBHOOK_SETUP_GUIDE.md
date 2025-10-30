@@ -229,3 +229,5 @@ verifyNotionSignature(body, signature, secret);
 - [ ] 테스트: Notion에서 새 페이지 생성
 - [ ] Vercel Logs에서 Webhook 수신 확인
 - [ ] 챗봇에서 최신 글 검색 테스트
+
+
