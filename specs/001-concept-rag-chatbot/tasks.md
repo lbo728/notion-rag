@@ -158,8 +158,8 @@ Next.js App Router structure:
 
 ### Tests for User Story 3
 
-- [ ] T060 [P] [US3] Unit test for incremental sync filtering by last_edited_time in tests/unit/lib/sync/notion-sync.test.ts
-- [ ] T061 [P] [US3] Integration test for Notion sync API and status reporting in tests/integration/api/sync.test.ts
+- [x] T060 [P] [US3] Unit test for incremental sync filtering by last_edited_time in tests/unit/lib/sync/notion-sync.test.ts
+- [x] T061 [P] [US3] Integration test for Notion sync API and status reporting in tests/integration/api/sync.test.ts
 
 ### Implementation for User Story 3 - Milestone 6: Scheduled Sync
 
