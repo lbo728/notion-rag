@@ -10,7 +10,6 @@ import type {
   DatabaseObjectResponse,
   PartialDatabaseObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints";
-import type { NotionBlock } from "../lib/notion/api-client";
 
 // Load environment variables FIRST
 dotenv.config({ path: resolve(process.cwd(), ".env.local") });
@@ -172,7 +171,7 @@ async function syncAllPagesFromDatabase() {
       }
 
       // Parse and extract text
-      const parsedBlocks = parseBlocks(blocks as unknown as NotionBlock[]);
+      const parsedBlocks = parseBlocks(blocks);
       const extractedTexts = extractTextFromBlocks(parsedBlocks);
 
       // Chunk text

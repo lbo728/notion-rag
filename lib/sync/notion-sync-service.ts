@@ -12,7 +12,6 @@ import type {
   BlockObjectResponse,
   PartialBlockObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints";
-import { NotionBlock as ApiClientNotionBlock } from "@/lib/notion/api-client";
 // import { preserveProperties } from "./property-preserver";
 
 type NotionBlock = BlockObjectResponse | PartialBlockObjectResponse;
@@ -299,17 +298,8 @@ async function syncPage(pageId: string, result: SyncResult) {
     cursor = response.next_cursor || undefined;
   } while (cursor);
 
-  // Parse blocks - convert to api-client NotionBlock format
-  const apiBlocks: ApiClientNotionBlock[] = blocks.map((block) => {
-    const baseBlock: ApiClientNotionBlock = {
-      ...block,
-      id: block.id,
-      type: "type" in block ? block.type : "paragraph",
-      has_children: "has_children" in block ? block.has_children : false,
-    };
-    return baseBlock;
-  });
-  const parsedBlocks = parseBlocks(apiBlocks);
+  // Parse blocks using SDK-native block types
+  const parsedBlocks = parseBlocks(blocks);
   const extractedTexts = extractTextFromBlocks(parsedBlocks);
 
   // Chunk text

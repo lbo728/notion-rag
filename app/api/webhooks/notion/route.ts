@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/utils/logger";
 import { getSupabase } from "@/lib/supabase/client";
-import {
-  getNotionClient,
-  NotionBlock as ApiClientNotionBlock,
-} from "@/lib/notion/api-client";
+import { getNotionClient } from "@/lib/notion/api-client";
 import { generateEmbedding } from "@/lib/embeddings/openai";
 import { parseBlocks } from "@/lib/notion/parser";
 import { extractTextFromBlocks } from "@/lib/notion/text-extractor";
@@ -237,17 +234,8 @@ async function syncPageFromWebhook(pageId: string) {
       cursor = response.next_cursor || undefined;
     } while (cursor);
 
-    // Parse and chunk - convert to api-client NotionBlock format
-    const apiBlocks: ApiClientNotionBlock[] = blocks.map((block) => {
-      const baseBlock: ApiClientNotionBlock = {
-        ...block,
-        id: block.id,
-        type: "type" in block ? block.type : "paragraph",
-        has_children: "has_children" in block ? block.has_children : false,
-      };
-      return baseBlock;
-    });
-    const parsedBlocks = parseBlocks(apiBlocks);
+    // Parse and chunk using SDK-native block types
+    const parsedBlocks = parseBlocks(blocks);
     const extractedTexts = extractTextFromBlocks(parsedBlocks);
     const chunks = chunkText(extractedTexts);
 

@@ -34,6 +34,12 @@ if (!notionApiKey) {
 const notionClient = new Client({ auth: notionApiKey });
 
 import { parseBlocks } from "../lib/notion/parser";
+import type {
+  PageObjectResponse,
+  PartialPageObjectResponse,
+  BlockObjectResponse,
+  PartialBlockObjectResponse,
+} from "@notionhq/client/build/src/api-endpoints";
 import { extractTextFromBlocks } from "../lib/notion/text-extractor";
 import { chunkText } from "../lib/notion/chunker";
 
@@ -43,7 +49,7 @@ import { chunkText } from "../lib/notion/chunker";
 async function syncPageByTitle(pageTitleOrId: string) {
   console.log(`🔍 Searching for page: "${pageTitleOrId}"...\n`);
 
-  let targetPage: any;
+  let targetPage: PageObjectResponse | PartialPageObjectResponse;
   let pageId: string;
 
   // Check if it's a page ID (UUID format)
@@ -59,7 +65,7 @@ async function syncPageByTitle(pageTitleOrId: string) {
       console.log(`✅ Found page by ID: ${pageId}`);
       console.log(`   Title: ${getPageTitle(targetPage)}\n`);
     } catch (error) {
-      console.error(`❌ Error fetching page ${pageId}:`, error);
+      console.error(`❌ Error fetching page ${pageTitleOrId}:`, error);
       return;
     }
   } else {
@@ -82,19 +88,19 @@ async function syncPageByTitle(pageTitleOrId: string) {
       return;
     }
 
+    // Filter to page results only
+    const pageResults = searchResults.results.filter(
+      (r): r is PageObjectResponse | PartialPageObjectResponse =>
+        "object" in r && r.object === "page"
+    );
+
     // Find exact match or use first result
-    targetPage = searchResults.results.find((page: any) => {
-      if (page.properties?.title?.title) {
-        const title = page.properties.title.title
-          .map((t: any) => t.plain_text)
-          .join("");
-        return title === pageTitleOrId;
-      }
-      return false;
-    });
+    targetPage =
+      pageResults.find((p) => getPageTitle(p) === pageTitleOrId) ||
+      (pageResults[0] as PageObjectResponse);
 
     if (!targetPage) {
-      targetPage = searchResults.results[0];
+      targetPage = pageResults[0] as PageObjectResponse;
       console.log(`⚠️  Exact match not found, using first result\n`);
     }
 
@@ -107,15 +113,16 @@ async function syncPageByTitle(pageTitleOrId: string) {
   const pageDetails = targetPage;
 
   // Extract title
-  const title = getPageTitle(pageDetails);
+  const title = getPageTitle(pageDetails as PageObjectResponse);
   const url =
-    (pageDetails as any).url || `https://notion.so/${pageId.replace(/-/g, "")}`;
+    (pageDetails as PageObjectResponse & { url?: string }).url ||
+    `https://notion.so/${pageId.replace(/-/g, "")}`;
 
   console.log(`📄 Syncing page content...`);
 
   // Fetch all blocks
-  const blocks = [];
-  let cursor = undefined;
+  const blocks: (BlockObjectResponse | PartialBlockObjectResponse)[] = [];
+  let cursor: string | undefined = undefined;
 
   do {
     const response = await notionClient.blocks.children.list({
@@ -129,13 +136,17 @@ async function syncPageByTitle(pageTitleOrId: string) {
   console.log(`   Found ${blocks.length} blocks\n`);
 
   // Save page to database
+  const fullPage = pageDetails as PageObjectResponse;
   const { error: pageError } = await supabase.from("notion_pages").upsert({
     page_id: pageId,
     title: title,
     url: url,
-    last_edited_time: pageDetails.last_edited_time,
-    last_edited_by: (pageDetails.last_edited_by as any)?.id || null,
-    properties: pageDetails.properties,
+    last_edited_time: fullPage.last_edited_time,
+    last_edited_by:
+      fullPage.last_edited_by && "id" in fullPage.last_edited_by
+        ? (fullPage.last_edited_by as { id: string }).id
+        : null,
+    properties: fullPage.properties as unknown as Record<string, unknown>,
     synced_at: new Date().toISOString(),
   });
 
@@ -148,7 +159,7 @@ async function syncPageByTitle(pageTitleOrId: string) {
 
   // Parse and extract text
   const parsedBlocks = parseBlocks(blocks);
-  const extractedTexts = extractTextFromBlocks(blocks);
+  const extractedTexts = extractTextFromBlocks(parsedBlocks);
 
   // Chunk text
   const chunks = chunkText(extractedTexts);
@@ -203,12 +214,18 @@ async function syncPageByTitle(pageTitleOrId: string) {
   console.log(`   Embeddings: ${embeddingsCreated}`);
 }
 
-function getPageTitle(page: any): string {
-  if (page.properties?.title?.title) {
-    return page.properties.title.title.map((t: any) => t.plain_text).join("");
-  }
-  if ((page as any).title) {
-    return (page as any).title;
+function getPageTitle(
+  page: PageObjectResponse | PartialPageObjectResponse
+): string {
+  const properties = (page as PageObjectResponse).properties as Record<
+    string,
+    { type: string; title?: Array<{ plain_text?: string }> }
+  >;
+  if (!properties) return "Untitled";
+  for (const prop of Object.values(properties)) {
+    if (prop.type === "title" && Array.isArray(prop.title)) {
+      return prop.title.map((t) => t?.plain_text || "").join("");
+    }
   }
   return "Untitled";
 }

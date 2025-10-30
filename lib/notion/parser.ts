@@ -1,4 +1,7 @@
-import { NotionBlock } from "./api-client";
+import type {
+  BlockObjectResponse,
+  PartialBlockObjectResponse,
+} from "@notionhq/client/build/src/api-endpoints";
 
 export interface ParsedBlock {
   id: string;
@@ -14,14 +17,21 @@ export interface ParsedBlock {
 /**
  * Parse a Notion block to extract text content
  */
-export function parseBlock(block: NotionBlock): ParsedBlock | null {
-  const { id, type, has_children } = block;
+export function parseBlock(
+  block: BlockObjectResponse | PartialBlockObjectResponse
+): ParsedBlock | null {
+  const { id, type, has_children } = block as {
+    id: string;
+    type: string;
+    has_children: boolean;
+  };
 
-  if (!block[type]) {
+  const typedBlock = block as unknown as Record<string, unknown>;
+  if (!typedBlock[type]) {
     return null;
   }
 
-  const content = block[type] as
+  const content = typedBlock[type] as
     | { rich_text?: Array<{ plain_text?: string }>; language?: string }
     | undefined;
   let text = "";
@@ -83,7 +93,9 @@ function extractRichText(
 /**
  * Parse multiple blocks and maintain hierarchy
  */
-export function parseBlocks(blocks: NotionBlock[]): ParsedBlock[] {
+export function parseBlocks(
+  blocks: (BlockObjectResponse | PartialBlockObjectResponse)[]
+): ParsedBlock[] {
   const parsed: ParsedBlock[] = [];
 
   for (const block of blocks) {
