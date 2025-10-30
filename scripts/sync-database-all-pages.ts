@@ -2,6 +2,15 @@ import dotenv from "dotenv";
 import { resolve } from "path";
 import { createClient } from "@supabase/supabase-js";
 import { Client } from "@notionhq/client";
+import type {
+  PageObjectResponse,
+  PartialPageObjectResponse,
+  BlockObjectResponse,
+  PartialBlockObjectResponse,
+  DatabaseObjectResponse,
+  PartialDatabaseObjectResponse,
+} from "@notionhq/client/build/src/api-endpoints";
+import type { NotionBlock } from "../lib/notion/api-client";
 
 // Load environment variables FIRST
 dotenv.config({ path: resolve(process.cwd(), ".env.local") });
@@ -56,13 +65,18 @@ async function syncAllPagesFromDatabase() {
   let databaseId: string | undefined;
 
   for (const db of searchResults.results) {
-    const title = getDatabaseTitle(db);
-    console.log(`📊 Found database: ${title}`);
-    console.log(`   ID: ${db.id}\n`);
+    if ("object" in db && db.object === "database") {
+      const database = db as
+        | DatabaseObjectResponse
+        | PartialDatabaseObjectResponse;
+      const title = getDatabaseTitle(database);
+      console.log(`📊 Found database: ${title}`);
+      console.log(`   ID: ${database.id}\n`);
 
-    if (title.includes("짧은 글쓰기") || title.includes("짧은")) {
-      databaseId = db.id;
-      break;
+      if (title.includes("짧은 글쓰기") || title.includes("짧은")) {
+        databaseId = database.id;
+        break;
+      }
     }
   }
 
@@ -80,7 +94,7 @@ async function syncAllPagesFromDatabase() {
   console.log("📄 Querying ALL pages from database...\n");
 
   // Query ALL pages from database (sorted by creation date descending)
-  const allPages = [];
+  const allPages: (PageObjectResponse | PartialPageObjectResponse)[] = [];
   let cursor: string | undefined;
 
   do {
@@ -96,7 +110,7 @@ async function syncAllPagesFromDatabase() {
       page_size: 100,
     });
 
-    allPages.push(...queryResponse.results);
+    allPages.push(...(queryResponse.results as PageObjectResponse[]));
     cursor = queryResponse.next_cursor || undefined;
   } while (cursor);
 
@@ -107,7 +121,7 @@ async function syncAllPagesFromDatabase() {
   let errorCount = 0;
 
   for (let i = 0; i < allPages.length; i++) {
-    const page = allPages[i] as any;
+    const page = allPages[i] as PageObjectResponse;
     const pageId = page.id;
     const pageTitle = getPageTitle(page);
 
@@ -116,7 +130,7 @@ async function syncAllPagesFromDatabase() {
 
     try {
       // Fetch all blocks
-      const blocks = [];
+      const blocks: (BlockObjectResponse | PartialBlockObjectResponse)[] = [];
       let blockCursor: string | undefined;
 
       do {
@@ -129,7 +143,9 @@ async function syncAllPagesFromDatabase() {
       } while (blockCursor);
 
       const title = pageTitle;
-      const url = page.url || `https://notion.so/${pageId.replace(/-/g, "")}`;
+      const url =
+        (page as PageObjectResponse & { url?: string }).url ||
+        `https://notion.so/${pageId.replace(/-/g, "")}`;
 
       // Delete existing page and blocks first
       await supabase.from("notion_blocks").delete().eq("page_id", pageId);
@@ -141,8 +157,11 @@ async function syncAllPagesFromDatabase() {
         title: title,
         url: url,
         last_edited_time: page.last_edited_time,
-        last_edited_by: (page.last_edited_by as any)?.id || null,
-        properties: page.properties,
+        last_edited_by:
+          page.last_edited_by && "id" in page.last_edited_by
+            ? (page.last_edited_by as { id: string }).id
+            : null,
+        properties: page.properties as unknown as Record<string, unknown>,
         synced_at: new Date().toISOString(),
       });
 
@@ -153,7 +172,7 @@ async function syncAllPagesFromDatabase() {
       }
 
       // Parse and extract text
-      const parsedBlocks = parseBlocks(blocks);
+      const parsedBlocks = parseBlocks(blocks as unknown as NotionBlock[]);
       const extractedTexts = extractTextFromBlocks(parsedBlocks);
 
       // Chunk text
@@ -214,28 +233,32 @@ async function syncAllPagesFromDatabase() {
   console.log(`\nTotal pages in vector DB: ${syncedCount}`);
 }
 
-function getPageTitle(page: any): string {
-  if (page.properties) {
-    // Look for title property
-    for (const [key, prop] of Object.entries(page.properties)) {
-      const propAny = prop as any;
-      if (propAny.type === "title" && propAny.title) {
-        if (Array.isArray(propAny.title)) {
-          return propAny.title.map((t: any) => t.plain_text || "").join("");
-        }
-        return String(propAny.title);
-      }
+function getPageTitle(
+  page: PageObjectResponse | PartialPageObjectResponse
+): string {
+  const properties = (page as PageObjectResponse).properties as Record<
+    string,
+    { type: string; title?: Array<{ plain_text?: string }> }
+  >;
+  if (!properties) return "Untitled";
+  for (const prop of Object.values(properties)) {
+    if (prop.type === "title" && Array.isArray(prop.title)) {
+      return prop.title.map((t) => t?.plain_text || "").join("");
     }
   }
   return "Untitled";
 }
 
-function getDatabaseTitle(db: any): string {
-  if (db.title && Array.isArray(db.title)) {
-    return db.title.map((t: any) => t.plain_text || "").join("");
-  }
-  if (db.title) {
-    return String(db.title);
+function getDatabaseTitle(
+  db: DatabaseObjectResponse | PartialDatabaseObjectResponse
+): string {
+  const title = (db as DatabaseObjectResponse).title as
+    | Array<{
+        plain_text?: string;
+      }>
+    | undefined;
+  if (Array.isArray(title)) {
+    return title.map((t) => t?.plain_text || "").join("");
   }
   return "Untitled Database";
 }

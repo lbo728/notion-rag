@@ -5,14 +5,16 @@ import { resolve } from "path";
 dotenv.config({ path: resolve(process.cwd(), ".env.local") });
 
 // Now import modules that depend on environment variables
-import { supabase } from "../lib/supabase/client";
+import { getSupabase } from "../lib/supabase/client";
+
+const supabase = getSupabase();
 
 async function checkSetup() {
   console.log("🔍 Checking setup...\n");
 
   // 1. Check Supabase connection
   console.log("1. Checking Supabase connection...");
-  const { data: healthCheck, error: healthError } = await supabase
+  const { error: healthError } = await supabase
     .from("notion_pages")
     .select("count")
     .limit(1);
